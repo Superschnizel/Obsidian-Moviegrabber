@@ -6,3 +6,26 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.preview_list_item{
+    min-height: fit-content;
+    display: flex;
+    align-items: center;
+}
+
+.preview_img {
+    max-height: 6lh;
+}
+
+.preview_Text{
+    margin-left: 1lh;
+    display: block;
+}
+
+.preview_Title{
+    font-size: large;
+}
+
+.preview_Year{
+    font-size: small;
+}
