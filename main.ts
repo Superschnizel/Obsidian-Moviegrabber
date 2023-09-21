@@ -24,6 +24,11 @@ export default class Moviegrabber extends Plugin {
 			id: 'moviegrabber-search',
 			name: 'Search movie',
 			callback: () => {
+				if (this.settings.OMDb_API_Key == '' || this.settings.YouTube_API_Key == '') {
+					var n = new Notice("missing one or more API keys!")
+					n.noticeEl.addClass("notice_error");
+					return;
+				}
 				new MoviegrabberSearchModal(this.app, (result) => 
 					{this.searchMovie(result);
 				}).open();

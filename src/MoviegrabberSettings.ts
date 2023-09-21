@@ -6,6 +6,6 @@ export interface MoviegrabberSettings {
 
 export const DEFAULT_SETTINGS: MoviegrabberSettings = {
 	MovieDirectory: 'Movies',
-	OMDb_API_Key: '__',
+	OMDb_API_Key: '',
 	YouTube_API_Key: ''
 }
