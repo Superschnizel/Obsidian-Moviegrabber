@@ -13,7 +13,7 @@ export class MoviegrabberSearchModal extends Modal {
   onOpen() {
     const { contentEl } = this;
 
-    contentEl.createEl("h1", { text: "Search Movie by Title" });
+    contentEl.createEl("h1", { text: "Search movie by title" });
     // contentEl.createEl("input", {type: "text", cls: "search_text"})
     var text = new TextComponent(contentEl.createDiv({cls : "search_text_box"}))
       .onChange((value) => { 

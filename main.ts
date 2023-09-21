@@ -22,7 +22,7 @@ export default class Moviegrabber extends Plugin {
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
 			id: 'moviegrabber-search',
-			name: 'Search Movie',
+			name: 'Search movie',
 			callback: () => {
 				new MoviegrabberSearchModal(this.app, (result) => 
 					{this.searchMovie(result);
@@ -167,9 +167,10 @@ export default class Moviegrabber extends Plugin {
 		`genre: [${movieData.Genre}]\n`+
 		`length: ${ movieData.Runtime.split(" ")![0] }\n`+
 		`seen:\n`+
-		`rating: 0\n`+
+		`rating: \n`+
 		`found_at: \n`+
 		`trailer_embed: ${await this.getTrailerEmbed(title, movieData.Year)}\n`+
+		`poster: "${movieData.Poster}"\n`+
 		`availability:\n`+
 		`---\n`+
 		`${movieData.Plot}`

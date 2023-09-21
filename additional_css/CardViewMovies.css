@@ -1,0 +1,296 @@
+/* READ ME */
+/*
+------------------------------------------------------------------------------------------------
+This file was adapted from https://obsidian-snippets.pages.dev/snippets/dataview-table-as-cards/
+by Leon Holtmeier (https://github.com/Superschnizel) to work with movie Notes.
+------------------------------------------------------------------------------------------------
+original Text:
+
+This css has been built to be used with dataview tables, and assumes you are not using dataviewjs. 
+But this can easily be adapted to list view. Because this css is not supported by a js backend, 
+text and backgrounds will not autosize (i think so anyway, i haven't found a way. if you do share 
+on discord @yungbananapeel#2624)
+
+I'm not that great as using css, so there is probably a lot of redundancies in the file. 
+The Main thing to understand about using the css to manipulate the tables is  the structure of a 
+DV table. 
+
+Any content about a page you want returned is delivered as a child element of a span, that is 
+nested inside of a TD.
+The TD's are the individual containers that make up the columns of a row. if you want to change 
+the structure of a table on top of this file, its important to remember all the relationships 
+between the TR>TD>SPAN>CONTENT. 
+
+An an example images and links are returned as <a> & <img> tags as children of a div, 
+but strings are returned as the content of the span, not as content of a child element.like so:
+<span>
+	<a href="mylink"> cool link </a>
+	<img src="prettyPic"> picture </img>
+</span>
+<span>YOUR TEXT HERE</span>
+
+TABLE STRUCTURE
+<div>
+	<table>
+		<thead>
+		</thead>
+		<tbody>
+			<tr>
+			EACH TR CORRESPONDS TO A SINGLE PAGE RETURNED FROM YOUR QUERY.
+				<td>
+					EACH TD CORRESPONDS TO A COLUMN
+					THEY ARE ORDERED TOP TO BOTTOM, IN ORDER FROM LEFT TO RIGHT
+					<span>
+					THIS SPAN IS WHERE YOUR RETURNS INFO IS (links, images, text)
+					</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+For Movies: Getting Title, country, year, seen, Trailer_embed, rating
+
+*/
+
+/* FULL WIDTH NOTE */
+
+/* for editing view - does not work? */
+.CardViewMovies.markdown-source-view.mod-cm6.is-readable-line-width:not(.is-rtl) .cm-contentContainer,
+.CardViewMovies.markdown-source-view.mod-cm6.is-line-wrap.is-readable-line-width .cm-content,
+.CardViewMovies.markdown-source-view.mod-cm6.is-line-wrap.is-readable-line-width .cm-line:not(.HyperMD-table-row) {
+    max-width: 2000px;
+}
+
+/* for reading view - works*/
+.CardViewMovies.markdown-preview-view.is-readable-line-width .markdown-preview-sizer {
+    max-width: 2000px;
+}
+
+.CardViewMovies.cm-s-obsidian span.cm-hmd-internal-link {
+    color: Aqua;
+}
+
+/* COLORS 
+.CardViewMovies {
+	--Name-bg: rgb(255, 0, 0);
+}
+*/
+/* Hide Table Head */
+.CardViewMovies thead{
+	display: none;
+	line-height: 0;
+	height: 0px;
+}
+
+CardViewMovies table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 100%;
+}
+
+
+/* Table wide Changes */
+/* .CardViewMovies tbody {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+} */
+/* Turn all spans into flex boxes*/
+.CardViewMovies span {
+	display: flex;
+	float: left;
+	margin: 0;
+	padding: 0;
+	max-width: 1000px;
+}
+
+/* Create a card Shape from the Table Row */
+.CardViewMovies tr {
+	display: block;
+	text-align: justify;
+	float: left;
+	padding: 0;
+	margin-right: 60px;
+	height: 475px;
+	width: 512px;
+	background-color: rgb(36, 32, 32) !important;
+	border: 5px solid rgb(22, 22, 22) !important;
+    border-radius: 15px;
+	box-shadow: 10px 11px 19px -1px #070202;
+}
+
+.CardViewMovies td {
+	display: block;
+	min-height: 50px;
+	padding: 15px;
+}
+
+/* First Column */
+/* First Column Box -- TITLE BOX */
+.CardViewMovies td:first-child {
+	min-height: 75px !important ;
+	background-color: rgba(37, 37, 37, 0.863);
+	border: 5px solid rgb(48, 48, 48) !important;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* First Column link -- TITLE LINK */
+.CardViewMovies td:first-child span a {
+	text-overflow: ellipsis !important;
+	word-wrap: break-word !important;
+	text-overflow: ellipsis !important;
+	display: block;
+	line-height: 1em;
+	max-height: 2em;
+	font-size: 23px;
+    text-decoration: none;
+	font-weight: bold !important;
+	color: #22577A !important;
+}
+
+/* Second Column  -- Country*/
+/* column bg */
+.CardViewMovies td:nth-child(2) {
+	display: flex;
+	float: left;
+    width: fit-content;
+    justify-content: center;
+    align-items: center;
+	line-height: 1em;
+	max-height: 2em;
+    padding-right: 1%;
+}
+
+/* column link */
+.CardViewMovies td:nth-child(2) span {
+	color: rgb(206, 211, 189) !important;
+	font-weight: bold !important;
+	word-wrap: break-word;
+	text-overflow: ellipsis !important;
+}
+
+/* Third column -- Year*/
+.CardViewMovies td:nth-child(3) {
+	color: rgb(255, 255, 255) !important;
+	width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    float: left;
+    padding-left: 0%;
+	line-height: 1em;
+	max-height: 2em;
+}
+
+.CardViewMovies td:nth-child(3)::before{
+    content: "(";
+}
+
+.CardViewMovies td:nth-child(3)::after{
+    content: ")";
+}
+
+/* Fourth column -- Length*/
+.CardViewMovies td:nth-child(4) {
+	/* color: rgb(255, 81, 81) !important; */
+	width: fit-content;
+	line-height: 1em;
+	max-height: 2em;
+	display: flex;
+    float: right;
+}
+
+.CardViewMovies td:nth-child(4)::after{
+    content: "\00a0min.";
+}
+
+/* Fifth Column -- Trailer Embed */
+.CardViewMovies td:nth-child(5) {
+	color: rgb(255, 81, 81) !important;
+	width: 100%;
+    height: 65%;
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.CardViewMovies td:nth-child(5) iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Sixth column -- Availability*/
+.CardViewMovies td:nth-child(6) {
+	color: rgb(0, 255, 42) !important;
+	width: fit-content;
+	line-height: 1em;
+	max-height: 2em;
+	display: flex;
+    float: left;
+}
+
+/* Seventh column -- Rating*/
+.CardViewMovies td:nth-child(7) {
+	color: rgb(52, 158, 123) !important;
+	width: fit-content;
+	line-height: 1em;
+	max-height: 2em;
+	display: flex;
+	float: right;
+	font-weight: bold;
+	
+}
+
+.CardViewMovies td:nth-child(7)::before{
+    content: "rating:\00a0";
+	color: white;
+	font-weight: normal;
+	
+}
+
+.CardViewMovies td:nth-child(7)::after{
+    content: "/10";
+	color: white;
+	font-weight: normal;
+	
+}
+
+/* Eighth column -- Seen*/
+.CardViewMovies td:nth-child(8) {
+	color: rgb(52, 158, 123) !important;
+	width: fit-content;
+	line-height: 1em;
+	max-height: 2em;
+	display: flex;
+    float: right;
+}
+
+.CardViewMovies td:nth-child(8)::before{
+    content: "Seen:\00a0";
+	color: white;
+}
+
+/* Last Column Image 
+.CardViewMovies td span img {
+	display: block;
+	width: 300px;
+	height: 300px;
+	object-fit: contain;
+	margin: 0 auto;
+	padding: 0;
+	margin: 20px auto;
+}
+*/
