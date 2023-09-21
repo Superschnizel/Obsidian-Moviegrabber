@@ -1,7 +1,7 @@
 {
 	"id": "Moviegrabber",
 	"name": "Moviegrabber",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Grab Movie Data from public APIs and transform it into Notes that can be used with dataview and properties",
 	"author": "Obsidian",
