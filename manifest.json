@@ -1,9 +1,9 @@
 {
-	"id": "Moviegrabber",
-	"name": "Moviegrabber",
+	"id": "moviegrabber",
+	"name": "moviegrabber",
 	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Grab Movie Data from public APIs and transform it into Notes that can be used with dataview and properties",
+	"description": "Grab movie data from public APIs and transform it into notes that can be used with dataview and properties",
 	"author": "Obsidian",
 	"authorUrl": "https://github.com/Superschnizel",
 	"isDesktopOnly": false
