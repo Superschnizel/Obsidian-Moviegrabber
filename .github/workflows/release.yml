@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - "*"
-permissions: read-all|write-all
 
 jobs:
   build:
