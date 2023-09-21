@@ -2,11 +2,11 @@
 
 A plugin to generate Notes for Movies with properties that can be used with [dataview](https://github.com/blacksmithgu/obsidian-dataview). Uses the [Open Movie Database (OMDb) API](http://www.omdbapi.com/) to retrieve movie data and the [Youtube Data API](https://developers.google.com/youtube/v3/docs?hl=de) to get the embed links for the trailers.
 
-
+<img src="https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/3df2496a-ad9c-46ec-a806-b048100e7d70" width=50%>
 
 # Usage
 
-
+https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/28e2ca9d-e504-4923-9609-dc1e5953d219
 
 *(disclaimer: the choice selection uses outside assets for the movie posters in the preview, retrieved in the search request to OMDb)*
 
@@ -18,8 +18,9 @@ To search for a movie simply call the command `Search movie`
 
 Using a [dataview](https://github.com/blacksmithgu/) table in combination with a custom [css snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets) you can use these notes to create an interactive display for your movies.
 
+https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/fc555eea-0ae4-46b4-87d2-44cc2626d387
 
-To use this copy `aditional_css/CardViewMovies.css` to your vault's snippets folder (`.obsidian/snippets/`) and put 
+To use this, copy `aditional_css/CardViewMovies.css` to your vault's snippets folder (`.obsidian/snippets/`) and put 
 
 ```yaml
 ---
