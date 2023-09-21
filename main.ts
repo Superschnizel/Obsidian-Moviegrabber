@@ -50,20 +50,23 @@ export default class Moviegrabber extends Plugin {
 	async searchMovie(title : string) {
 		var url = new URL("http://www.omdbapi.com");
 		
-		url.searchParams.append('apikey', this.settings.API_Key);
+		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('s', title);
 		url.searchParams.append('type', "movie");
 
 		const response = await fetch(url);
 
 		if (!response.ok) {
+			var n = new Notice(`Http Error! Status: ${response.status}`);
+			n.noticeEl.addClass("notice_error");
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
 
 		const data = await response.json();
 
 		if (data.Response != "True") {
-			new Notice(`Found no movies named ${title}!`)
+			var n = new Notice(`Found no movies named ${title}!`)
+			n.noticeEl.addClass("notice_error")
 			return;
 		}
 
@@ -79,38 +82,85 @@ export default class Moviegrabber extends Plugin {
 	async getMovieData(title : string) : Promise<MovieData | null | undefined> {
 		var url = new URL("http://www.omdbapi.com");
 		
-		url.searchParams.append('apikey', this.settings.API_Key);
+		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('t', title);
 
 		const response = await fetch(url);
 
 		if (!response.ok) {
+			var n = new Notice(`Http Error! Status: ${response.status}`);
+			n.noticeEl.addClass("notice_error");
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
 
 		const data = await response.json();
 
 		if (data.Response != "True") {
-			new Notice(`Found no movies named ${title}!`)
+			var n = new Notice(`Found no movies named ${title}!`)
+			n.noticeEl.addClass("notice_error");
 			return null;
 		}
 
 		return data as MovieData;
 	}
 
+	async getTrailerEmbed(title : string, year : number) : Promise<string> {
+		var url = new URL("https://www.googleapis.com/youtube/v3/search");
+
+		url.searchParams.append("part", "snippet");
+		url.searchParams.append("key", this.settings.YouTube_API_Key);
+		url.searchParams.append("type", "video")
+		url.searchParams.append("q", `${title} ${year} trailer`)
+
+		const response = await fetch(url);
+
+		if (!response.ok) {
+			var n = new Notice(`Http Error! Status: ${response.status}`);
+			n.noticeEl.addClass("notice_error");
+			throw new Error(`HTTP error! Status: ${response.status}`);
+		}
+
+		const data = await response.json();
+
+		if ('error' in data) {
+			var n = new Notice('failed to grab Trailer');
+			n.noticeEl.addClass("notice_error");
+			return '';
+		}
+
+		var embed = `<iframe src="https://www.youtube.com/embed/${data.items[0].id.videoId}" title="${data.items[0].snippet.title.replace(/[/\\?%*:|"<>]/g, '')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+
+		return embed;
+	}
+
 	async createNote(title : string) {
+		// create path and check for directory before posting the request
+
+		var dir = this.settings.MovieDirectory != '' ? `/${this.settings.MovieDirectory}/` : '';
+		var path = `${dir}${title.replace(/[/\\?%*:|"<>]/g, '')}.md`
+		
+		if (this.app.vault.getAbstractFileByPath(path) != null) {
+			var n = new Notice("File for Movie already exists!");
+			n.noticeEl.addClass("notice_error");
+			return;
+		}
+
 		var movieData = await this.getMovieData(title);
 		
 		if (movieData == null){
-			new Notice(`something went wrong in fetching ${title} data`)
+			var n = new Notice(`something went wrong in fetching ${title} data`)
+			n.noticeEl.addClass("notice_error")
 			return;
 		}
-	
+		
+		// clean Movie Title to avoid frontmatter issues
+		movieData.Title = movieData.Title.replace(/[/\\?%*:|"<>]/g, '');
+
 		var content = 
 		`---\n`+
 		`type: movie\n`+
 		`country: ${movieData.Country}\n`+
-		`title: ${movieData.Title.replace(/[/\\?%*:|"<>]/g, '')}\n`+
+		`title: ${movieData.Title}\n`+
 		`year: ${movieData.Year}\n`+
 		`director: ${movieData.Director}\n`+
 		`actors: [${movieData.Actors}]\n`+
@@ -119,12 +169,11 @@ export default class Moviegrabber extends Plugin {
 		`seen:\n`+
 		`rating: 0\n`+
 		`found_at: \n`+
-		`trailer_embed:\n`+
+		`trailer_embed: ${await this.getTrailerEmbed(title, movieData.Year)}\n`+
 		`availability:\n`+
 		`---\n`+
 		`${movieData.Plot}`
 
-		var path = `/${this.settings.MovieDirectory}/${movieData.Title.replace(/[/\\?%*:|"<>]/g, '')}.md`
 		this.app.vault.create(path, content)
 	}
 }
@@ -146,7 +195,7 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 			.setName('Movie Folder')
 			.setDesc('Folder in which to Save the generated notes')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
+				.setPlaceholder('Movies')
 				.setValue(this.plugin.settings.MovieDirectory)
 				.onChange(async (value) => {
 					this.plugin.settings.MovieDirectory = value;
@@ -155,13 +204,24 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 		
 		new Setting(containerEl)
 			.setName('OMDb API Key')
-			.setDesc('The API key for OMDb')
+			.setDesc('Your API key for OMDb')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.API_Key)
+				.setPlaceholder('')
+				.setValue(this.plugin.settings.OMDb_API_Key)
 				.onChange(async (value) => {
-					this.plugin.settings.API_Key = value;
+					this.plugin.settings.OMDb_API_Key = value;
 					await this.plugin.saveSettings();
 				}));
+		
+		new Setting(containerEl)
+		.setName('Youtube API Key')
+		.setDesc('Your API key for Youtube')
+		.addText(text => text
+			.setPlaceholder('')
+			.setValue(this.plugin.settings.YouTube_API_Key)
+			.onChange(async (value) => {
+				this.plugin.settings.YouTube_API_Key = value;
+				await this.plugin.saveSettings();
+			}));
 	}
 }

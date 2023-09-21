@@ -7,6 +7,22 @@ If your plugin does not need CSS, delete this file.
 
 */
 
+.search_text_box{
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.search_text{
+    margin: var(--size-4-2);
+    margin-bottom: var(--size-4-4);
+    margin-top: var(--size-4-4);
+    width: 96%;
+    border-top: 1px solid var(--background-modifier-border) !important;
+}
+
+.notice_error{
+    background-color: var(--color-red);
+}
+
 .preview_list_item{
     min-height: fit-content;
     display: flex;
@@ -14,11 +30,11 @@ If your plugin does not need CSS, delete this file.
 }
 
 .preview_img {
-    max-height: 6lh;
+    max-height: 112px;
 }
 
 .preview_Text{
-    margin-left: 1lh;
+    margin-left: var(--size-4-4);
     display: block;
 }
 

@@ -1,4 +1,4 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal, Setting, TextComponent } from "obsidian";
 
 
 export class MoviegrabberSearchModal extends Modal {
@@ -14,14 +14,20 @@ export class MoviegrabberSearchModal extends Modal {
     const { contentEl } = this;
 
     contentEl.createEl("h1", { text: "Search Movie by Title" });
-
-    new Setting(contentEl)
-      .setName("Title")
-      .addText((text) =>
-        text.onChange((value) => {
-          this.result = value
-        }));
-
+    // contentEl.createEl("input", {type: "text", cls: "search_text"})
+    var text = new TextComponent(contentEl.createDiv({cls : "search_text_box"}))
+      .onChange((value) => { 
+        this.result = value;
+      });
+    text.inputEl.addClass("search_text");
+    text.inputEl.focus();
+    text.inputEl.addEventListener("keypress", ({key}) => {
+      if (key === 'Enter') {
+        this.close();
+        this.onSubmit(this.result);
+      }
+    })
+    
     new Setting(contentEl)
       .addButton((btn) =>
         btn
