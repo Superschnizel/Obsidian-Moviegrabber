@@ -84,11 +84,11 @@ export default class Moviegrabber extends Plugin {
 
 
 	// get the Movie Data from OMDb
-	async getMovieData(title : string) : Promise<MovieData | null | undefined> {
+	async getMovieData(movie : MovieSearchItem) : Promise<MovieData | null | undefined> {
 		var url = new URL("http://www.omdbapi.com");
 		
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
-		url.searchParams.append('t', title);
+		url.searchParams.append('i', movie.imdbID);
 
 		const response = await fetch(url);
 
@@ -101,7 +101,7 @@ export default class Moviegrabber extends Plugin {
 		const data = await response.json();
 
 		if (data.Response != "True") {
-			var n = new Notice(`Found no movies named ${title}!`)
+			var n = new Notice(`Found no movies named ${movie.Title}!`)
 			n.noticeEl.addClass("notice_error");
 			return null;
 		}
@@ -133,16 +133,16 @@ export default class Moviegrabber extends Plugin {
 			return '';
 		}
 
-		var embed = `<iframe src="https://www.youtube.com/embed/${data.items[0].id.videoId}" title="${data.items[0].snippet.title.replace(/[/\\?%*:|"<>]/g, '')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+		var embed = `<iframe src="https://www.youtube.com/embed/${data.items[0].id.videoId}" title="${data.items[0].snippet.title.replace(/[/\\?%*:|#"<>]/g, '')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
 
 		return embed;
 	}
 
-	async createNote(title : string) {
+	async createNote(movie : MovieSearchItem) {
 		// create path and check for directory before posting the request
 
 		var dir = this.settings.MovieDirectory != '' ? `/${this.settings.MovieDirectory}/` : '';
-		var path = `${dir}${title.replace(/[/\\?%*:|"<>]/g, '')}.md`
+		var path = `${dir}${movie.Title.replace(/[/\\?%*:|"<>]/g, '')}.md`
 		
 		if (this.app.vault.getAbstractFileByPath(path) != null) {
 			var n = new Notice("File for Movie already exists!");
@@ -150,10 +150,10 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 
-		var movieData = await this.getMovieData(title);
+		var movieData = await this.getMovieData(movie);
 		
 		if (movieData == null){
-			var n = new Notice(`something went wrong in fetching ${title} data`)
+			var n = new Notice(`something went wrong in fetching ${movie.Title} data`)
 			n.noticeEl.addClass("notice_error")
 			return;
 		}
@@ -174,7 +174,7 @@ export default class Moviegrabber extends Plugin {
 		`seen:\n`+
 		`rating: \n`+
 		`found_at: \n`+
-		`trailer_embed: ${await this.getTrailerEmbed(title, movieData.Year)}\n`+
+		`trailer_embed: ${await this.getTrailerEmbed(movieData.Title, movieData.Year)}\n`+
 		`poster: "${movieData.Poster}"\n`+
 		`availability:\n`+
 		`---\n`+

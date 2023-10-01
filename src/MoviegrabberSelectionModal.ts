@@ -5,17 +5,17 @@ export class MoviegrabberSelectionModal extends SuggestModal<MovieSearchItem> {
     result: string;
     searchQuerry : string;
     searchResults : MovieSearch;
-    onSubmit: (result: string) => void;
+    onSubmit: (result: MovieSearchItem) => void;
   
-    constructor(app: App, searchResults : MovieSearch,  onSubmit: (result: string) => void) {
+    constructor(app: App, searchResults : MovieSearch,  onSubmit: (result: MovieSearchItem) => void) {
       super(app);
       this.onSubmit = onSubmit;
       this.searchResults = searchResults;
     }
   
     getSuggestions(query: string): MovieSearchItem[] {
-        return this.searchResults.Search.filter((book) =>
-          book.Title.toLowerCase().includes(query.toLowerCase())
+        return this.searchResults.Search.filter((movie) =>
+          movie.Title.toLowerCase().includes(query.toLowerCase())
         );
       }
     
@@ -33,7 +33,7 @@ export class MoviegrabberSelectionModal extends SuggestModal<MovieSearchItem> {
     
       // Perform action on the selected suggestion.
       onChooseSuggestion(movie: MovieSearchItem, evt: MouseEvent | KeyboardEvent) {
-        new Notice(`Selected ${movie.Title} (${movie.Year})`);
-        this.onSubmit(movie.Title);
+        new Notice(`Creating Note for: ${movie.Title} (${movie.Year})`);
+        this.onSubmit(movie);
       }
   }
