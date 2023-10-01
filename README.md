@@ -1,6 +1,6 @@
 # Obsidian Moviegrabber
 
-A plugin to generate Notes for Movies with properties that can be used with [dataview](https://github.com/blacksmithgu/obsidian-dataview). Uses the [Open Movie Database (OMDb) API](http://www.omdbapi.com/) to retrieve movie data and the [Youtube Data API](https://developers.google.com/youtube/v3/docs?hl=de) to get the embed links for the trailers.
+A plugin to generate notes for movies with properties that can be used with [dataview](https://github.com/blacksmithgu/obsidian-dataview). Uses the [Open Movie Database (OMDb) API](http://www.omdbapi.com/) to retrieve movie data and the [Youtube Data API](https://developers.google.com/youtube/v3/docs?hl=de) to get the embed links for the trailers.
 
 <img src="https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/3df2496a-ad9c-46ec-a806-b048100e7d70" width=50%>
 
@@ -8,15 +8,15 @@ A plugin to generate Notes for Movies with properties that can be used with [dat
 
 https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/28e2ca9d-e504-4923-9609-dc1e5953d219
 
-*(disclaimer: the choice selection uses outside assets for the movie posters in the preview, retrieved in the search request to OMDb)*
+*(Disclaimer: the choice selection uses outside assets for the movie posters in the preview, retrieved in the search request to OMDb)*
 
-To use this plugin you need to create an API Key for the OMDb [here](http://www.omdbapi.com/apikey.aspx), and also a Youtube Data API Key as is described [here](https://developers.google.com/youtube/v3/docs#calling-the-api). and set these in the plugins settings.
+To use this plugin you need to create an API key for the OMDb [here](http://www.omdbapi.com/apikey.aspx) and also a Youtube Data API Key as described [here](https://developers.google.com/youtube/v3/docs#calling-the-api). and set these in the plugin settings.
 
-To search for a movie simply call the command `Search movie`
+To search for a movie, simply call the command `Search movie`
 
-# Using with Dataview and custom css
+# Using the generated notes with Dataview and custom CSS
 
-Using a [dataview](https://github.com/blacksmithgu/) table in combination with a custom [css snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets) you can use these notes to create an interactive display for your movies.
+Using a [dataview](https://github.com/blacksmithgu/) table in combination with a custom [css snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets), you can use these notes to create an interactive display for your movies.
 
 https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/fc555eea-0ae4-46b4-87d2-44cc2626d387
 
@@ -29,7 +29,7 @@ cssclass: CardViewMovies
 ```
 at the top of your note.
 
-A dataview querry for movies not yet seen could look something like this:
+A dataview query for movies not yet seen could look something like this:
 
 ````dataview
 ```dataview
