@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl } from 'obsidian';
 
 import {MoviegrabberSettings, DEFAULT_SETTINGS} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
@@ -11,17 +11,10 @@ export default class Moviegrabber extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		
-		this.addRibbonIcon("dice", "Open menu", (event) => {
-			new MoviegrabberSelectionModal(this.app, TEST_SEARCH, (result) =>
-			{
-				this.createNote(result);
-			}).open();
-		});
-		
+				
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
-			id: 'moviegrabber-search',
+			id: 'search-movie',
 			name: 'Search movie',
 			callback: () => {
 				if (this.settings.OMDb_API_Key == '' || this.settings.YouTube_API_Key == '') {
@@ -59,15 +52,14 @@ export default class Moviegrabber extends Plugin {
 		url.searchParams.append('s', title);
 		url.searchParams.append('type', "movie");
 
-		const response = await fetch(url);
-
-		if (!response.ok) {
+		const response = await requestUrl(url.toString());
+		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
 			n.noticeEl.addClass("notice_error");
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
 
-		const data = await response.json();
+		const data = await response.json;
 
 		if (data.Response != "True") {
 			var n = new Notice(`Found no movies named ${title}!`)
@@ -90,15 +82,15 @@ export default class Moviegrabber extends Plugin {
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('i', movie.imdbID);
 
-		const response = await fetch(url);
+		const response = await requestUrl(url.toString());
 
-		if (!response.ok) {
+		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
 			n.noticeEl.addClass("notice_error");
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
 
-		const data = await response.json();
+		const data = await response.json;
 
 		if (data.Response != "True") {
 			var n = new Notice(`Found no movies named ${movie.Title}!`)
@@ -117,15 +109,15 @@ export default class Moviegrabber extends Plugin {
 		url.searchParams.append("type", "video")
 		url.searchParams.append("q", `${title} ${year} trailer`)
 
-		const response = await fetch(url);
+		const response = await requestUrl(url.toString());
 
-		if (!response.ok) {
+		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
 			n.noticeEl.addClass("notice_error");
 			throw new Error(`HTTP error! Status: ${response.status}`);
 		}
 
-		const data = await response.json();
+		const data = await response.json;
 
 		if ('error' in data) {
 			var n = new Notice('failed to grab Trailer');
@@ -198,8 +190,8 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Movie Folder')
-			.setDesc('Folder in which to Save the generated notes')
+			.setName('Movie folder')
+			.setDesc('Folder in which to save the generated notes')
 			.addText(text => text
 				.setPlaceholder('Movies')
 				.setValue(this.plugin.settings.MovieDirectory)
@@ -209,7 +201,7 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 				}));
 		
 		new Setting(containerEl)
-			.setName('OMDb API Key')
+			.setName('OMDb API key')
 			.setDesc('Your API key for OMDb')
 			.addText(text => text
 				.setPlaceholder('')
@@ -220,7 +212,7 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 				}));
 		
 		new Setting(containerEl)
-		.setName('Youtube API Key')
+		.setName('Youtube API key')
 		.setDesc('Your API key for Youtube')
 		.addText(text => text
 			.setPlaceholder('')
