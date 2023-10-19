@@ -2,7 +2,12 @@
 
 A plugin to generate notes for movies and series with properties that can be used with [dataview](https://github.com/blacksmithgu/obsidian-dataview). Uses the [Open Movie Database (OMDb) API](http://www.omdbapi.com/) to retrieve movie/series data and the [Youtube Data API](https://developers.google.com/youtube/v3/docs?hl=de) to get the embed links for the trailers.
 
-<img src="https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/3df2496a-ad9c-46ec-a806-b048100e7d70" width=50%>
+<p float="left">
+	<img src="https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/3df2496a-ad9c-46ec-a806-b048100e7d70" width="41%">
+	<img src="https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/99770856-7e87-4333-88c0-690e16688d55" width="50%">
+</p>
+
+---
 
 # Usage
 
@@ -17,6 +22,9 @@ To search for a movie or series, simply call the command `Search movie` or `Sear
 # Using the generated notes with Dataview and custom CSS
 
 Using a [dataview](https://github.com/blacksmithgu/) table in combination with a custom [css snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets), you can use these notes to create an interactive display for your movies.
+
+![grafik](https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/be2345a6-eeab-4e8b-b2e1-2a5263a9dc41)
+
 
 https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/fc555eea-0ae4-46b4-87d2-44cc2626d387
 
