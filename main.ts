@@ -4,8 +4,6 @@ import {MoviegrabberSettings, DEFAULT_SETTINGS} from "./src/MoviegrabberSettings
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
 import {MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
-import { existsSync } from 'fs';
-
 
 export default class Moviegrabber extends Plugin {
 	settings: MoviegrabberSettings;
@@ -13,8 +11,6 @@ export default class Moviegrabber extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		
-		
-		console.log(this.app.vault.adapter.exists('/fuskcnslgasdfalög/'));
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
 			id: 'search-movie',
@@ -109,8 +105,6 @@ export default class Moviegrabber extends Plugin {
 		}
 
 		const data = await response.json;
-
-		console.log(data);
 
 		if (data.Response != "True") {
 			var n = new Notice(`Found no movies named ${movie.Title}!`)
