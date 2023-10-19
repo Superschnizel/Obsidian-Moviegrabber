@@ -36,6 +36,7 @@ export interface MovieData{
     BoxOffice: string,
     Production: string,
     Website: string,
+    totalSeasons: number,
     Response: boolean
   }
 

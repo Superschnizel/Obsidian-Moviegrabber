@@ -4,16 +4,18 @@ import { App, Modal, Setting, TextComponent } from "obsidian";
 export class MoviegrabberSearchModal extends Modal {
   result: string;
   onSubmit: (result: string) => void;
+  searchType : string;
 
-  constructor(app: App, onSubmit: (result: string) => void) {
+  constructor(app: App, searchType: 'movie' | 'series',onSubmit: (result: string) => void) {
     super(app);
     this.onSubmit = onSubmit;
+    this.searchType = searchType;
   }
 
   onOpen() {
     const { contentEl } = this;
 
-    contentEl.createEl("h1", { text: "Search movie by title" });
+    contentEl.createEl("h1", { text: `Search ${this.searchType} by title` });
     // contentEl.createEl("input", {type: "text", cls: "search_text"})
     var text = new TextComponent(contentEl.createDiv({cls : "search_text_box"}))
       .onChange((value) => { 

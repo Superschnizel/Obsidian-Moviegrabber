@@ -33,7 +33,6 @@ export class MoviegrabberSelectionModal extends SuggestModal<MovieSearchItem> {
     
       // Perform action on the selected suggestion.
       onChooseSuggestion(movie: MovieSearchItem, evt: MouseEvent | KeyboardEvent) {
-        new Notice(`Creating Note for: ${movie.Title} (${movie.Year})`);
         this.onSubmit(movie);
       }
   }
