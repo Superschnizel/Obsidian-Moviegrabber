@@ -151,9 +151,9 @@ export default class Moviegrabber extends Plugin {
 		
 		dir.replace(/(^[/\s]+)|([/\s]+$)/g, ''); // clean up
 
-		var dir = dir != '' ? `/${dir}/` : '';
+		var dir = dir != '' ? `/${dir.replace(/\/$/, "")}/` : '';
 		
-		if (!(await this.app.vault.adapter.exists('dir'))) {
+		if (!(await this.app.vault.adapter.exists(dir))) {
 			var n = new Notice(`Folder for ${type}: ${dir} does not exist!`)
 			n.noticeEl.addClass("notice_error")
 			return;
