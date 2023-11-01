@@ -4,6 +4,9 @@ export interface MoviegrabberSettings {
 	OMDb_API_Key: string;
 	YouTube_API_Key: string;
 	SwitchToCreatedNote: boolean;
+
+	MovieTemplatePath: string;
+	SeriesTemplatePath: string;
 }
 
 export const DEFAULT_SETTINGS: MoviegrabberSettings = {
@@ -11,5 +14,25 @@ export const DEFAULT_SETTINGS: MoviegrabberSettings = {
 	SeriesDirectory: 'Series',
 	OMDb_API_Key: '',
 	YouTube_API_Key: '',
-	SwitchToCreatedNote: true
+	SwitchToCreatedNote: true,
+	MovieTemplatePath: '',
+	SeriesTemplatePath: ''
 }
+
+export const DEFAULT_TEMPLATE: string = "---\n"+
+	"type: {{Type}}\n"+
+	`country: {{Country}}\n`+
+	`title: {{Title}}\n`+
+	`year: {{Year}}\n`+
+	`director: {{Director}}\n`+
+	`actors: [{{Actors}}]\n`+
+	`genre: [{{Genre}}]\n`+
+	`length: {{Runtime}}\n`+
+	`seen:\n`+
+	`rating: \n`+
+	`found_at: \n`+
+	`trailer_embed: {{YoutubeEmbed}}\n` +
+	`poster: "{{Poster}}"\n`+
+	`availability:\n`+
+	`---\n`+
+	`{{Plot}}`

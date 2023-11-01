@@ -1,6 +1,6 @@
-import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, RequestUrlResponse } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, RequestUrlResponse, TFile } from 'obsidian';
 
-import {MoviegrabberSettings, DEFAULT_SETTINGS} from "./src/MoviegrabberSettings"
+import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
 import {MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
@@ -59,7 +59,13 @@ export default class Moviegrabber extends Plugin {
 	}
 
 	// search the OMDb and oben selection Modal if some are found
-	async searchOmdb(title : string, type : 'movie' | 'series') {
+	async searchOmdb(title : string, type : 'movie' | 'series', depth : number=0) {
+		// cancel recursive retries if depth is too low
+		if (depth >= 4) {
+			this.SendWarningNotice(`Stopping after ${depth +1 } tries.`)
+			return;
+		}
+		
 		// build request URL
 		var url = new URL("http://www.omdbapi.com");
 		
@@ -72,8 +78,8 @@ export default class Moviegrabber extends Plugin {
 		try {
 			response = await requestUrl(url.toString());	
 		} catch (error) {
-			var n = new Notice(`Error in request while trying to search ${type}!`);
-			n.noticeEl.addClass("notice_error");
+			this.SendWarningNotice(`Error in request while trying to search ${type}!\nretrying...`);
+			this.searchOmdb(title, type, depth + 1);
 			return;
 		}
 		
@@ -186,9 +192,8 @@ export default class Moviegrabber extends Plugin {
 
 		var dir = type == 'movie' ? this.settings.MovieDirectory : this.settings.SeriesDirectory;
 		
-		dir.replace(/(^[/\s]+)|([/\s]+$)/g, ''); // clean up
-
-		var dir = dir != '' ? `/${dir.replace(/\/$/, "")}/` : '';
+		dir = this.CleanPath(dir);
+		dir = dir != '' ? `/${dir}/` : ''; // this might be unecessary.
 		
 		if (!(await this.app.vault.adapter.exists(dir))) {
 			var n = new Notice(`Folder for ${type}: ${dir} does not exist!`)
@@ -214,10 +219,21 @@ export default class Moviegrabber extends Plugin {
 		
 		new Notice(`Creating Note for: ${item.Title} (${item.Year})`);
 
-		// clean Movie Title to avoid frontmatter issues
-		itemData.Title = itemData.Title.replace(/[/\\?%*:|"<>]/g, '');
+		// add and clean up data
+		itemData.Title = itemData.Title.replace(/[/\\?%*:|"<>]/g, ''); // clean Movie Title to avoid frontmatter issues
+		itemData.Runtime = itemData.Runtime ? itemData.Runtime.split(" ")[0] : '';
+		if (this.settings.YouTube_API_Key != '') {
+			itemData.YoutubeEmbed = await this.getTrailerEmbed(itemData.Title, itemData.Year);
+		}
 
-		var content = 
+		// get and fill template
+
+		var template = await this.GetTemplate(type)
+		if (template == null) {
+			return;
+		}
+		var content = await this.FillTemplate(template, itemData)
+		/* var content = 
 		`---\n`+
 		`type: ${type}\n`+
 		`country: ${itemData.Country}\n`+
@@ -235,12 +251,89 @@ export default class Moviegrabber extends Plugin {
 		`poster: "${itemData.Poster}"\n`+
 		`availability:\n`+
 		`---\n`+
-		`${itemData.Plot}`
+		`${itemData.Plot}` */
 
+		// create and open file
 		var tFile = await this.app.vault.create(path, content);
 		if (this.settings.SwitchToCreatedNote) {
 			this.app.workspace.getLeaf().openFile(tFile);
 		}
+	}
+
+	async GetTemplate(type : 'movie' | 'series') : Promise<string | null> {
+		if (this.settings.MovieTemplatePath == '') {
+			// no template given, return default
+			return DEFAULT_TEMPLATE;
+		}
+
+		// handle paths with both .md and not .md at the end
+		var path = type == 'movie' ? this.settings.MovieTemplatePath : this.settings.SeriesTemplatePath;
+		path = this.CleanPath(path).replace(".md", '') + '.md';
+
+		var tAbstractFile = await this.app.vault.getAbstractFileByPath(path);
+		if (tAbstractFile == null || !(tAbstractFile instanceof TFile)) {
+			this.SendWarningNotice("Template Path is not a File in Vault.\nstopping")
+			return null;
+		}
+
+		var tFile = tAbstractFile as TFile;
+		var text = await this.app.vault.cachedRead(tFile);
+		return text;
+	}
+
+	async FillTemplate(template : string, data : MovieData) : Promise<string> {
+		return template.replace(/{{(.*?)}}/g, (match) => {
+			return data[match.split(/{{|}}/).filter(Boolean)[0].trim()]
+		});
+	}
+
+	SendWarningNotice(text:string) {
+		var n = new Notice(text);
+		n.noticeEl.addClass("notice_error")
+	}
+
+	async CreateDefaultTemplateFile(){
+		var content = DEFAULT_TEMPLATE +
+			"\n\n\n%%\n" +
+			"Available tags:\n" +
+			"----------------------\n" +
+			"{{Title}}\n" +
+			"{{Year}}\n" +
+			"{{Rated}}\n" +
+			"{{Runtime}}\n" +
+			"{{Genre}}\n" +
+			"{{Director}}\n" +
+			"{{Writer}}\n" +
+			"{{Actors}}\n" +
+			"{{Plot}}\n" +
+			"{{Language}}\n" +
+			"{{Country}}\n" +
+			"{{Awards}}\n" +
+			"{{Poster}}\n" +
+			"{{Ratings}}\n" +
+			"{{Metascore}}\n" +
+			"{{imdbRating}}\n" +
+			"{{imdbVotes}}\n" +
+			"{{imdbID}}\n" +
+			"{{Type}}\n" +
+			"{{DVD}}\n" +
+			"{{BoxOffice}}\n" +
+			"{{Production}}\n" +
+			"{{Website}}\n" +
+			"{{totalSeasons}}\n" +
+			"{{YoutubeEmbed}}\n" +
+			"%%";
+		
+		// create and open file
+		var tFile = await this.app.vault.create('/Moviegrabber-example-template.md', content);
+		this.app.workspace.getLeaf().openFile(tFile);
+		
+	}
+
+	CleanPath(path : string) :string {
+		path.replace(/(^[/\s]+)|([/\s]+$)/g, ''); // clean up forbidden symbols
+		path = path != '' ? `${path.replace(/\/$/, "")}` : ''; // trim "/"
+		return path;
 	}
 }
 
@@ -309,6 +402,37 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.SwitchToCreatedNote = value;
 					await this.plugin.saveSettings();
+				}));
+		
+		containerEl.createEl('h1', { text : "Templates"})
+		new Setting(containerEl)
+			.setName('Movie template file path')
+			.setDesc('Path to the template file that is used to create notes for movies')
+			.addText(text => text
+				.setPlaceholder('')
+				.setValue(this.plugin.settings.MovieTemplatePath)
+				.onChange(async (value) => {
+					this.plugin.settings.MovieTemplatePath = value;
+					await this.plugin.saveSettings();
+				}));
+		
+		new Setting(containerEl)
+			.setName('Series template file path')
+			.setDesc('Path to the template file that is used to create notes for series')
+			.addText(text => text
+				.setPlaceholder('')
+				.setValue(this.plugin.settings.SeriesTemplatePath)
+				.onChange(async (value) => {
+					this.plugin.settings.SeriesTemplatePath = value;
+					await this.plugin.saveSettings();
+				}));
+		new Setting(containerEl)
+			.setName('Create example template file')
+			.setDesc('Creates an example template file to expand and use.\nThe file is called `/Moviegrabber-example-template`')
+			.addButton(btn => btn
+				.setButtonText("Create")
+				.onClick((event) => {
+					this.plugin.CreateDefaultTemplateFile();
 				}));
 	}
 }

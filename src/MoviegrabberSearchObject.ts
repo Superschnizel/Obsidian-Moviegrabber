@@ -13,6 +13,7 @@ export interface MovieSearchItem{
 }
 
 export interface MovieData{
+    [key:string]: any,
     Title: string,
     Year: number,
     Rated: string
