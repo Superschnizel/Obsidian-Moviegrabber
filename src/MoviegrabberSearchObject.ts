@@ -37,7 +37,8 @@ export interface MovieData{
     Production: string,
     Website: string,
     totalSeasons: number,
-    Response: boolean
+    Response: boolean,
+    YoutubeEmbed: string
   }
 
 export const TEST_SEARCH : MovieSearch = {

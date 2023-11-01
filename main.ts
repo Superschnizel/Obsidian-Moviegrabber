@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, RequestUrlResponse } from 'obsidian';
 
 import {MoviegrabberSettings, DEFAULT_SETTINGS} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
@@ -16,8 +16,8 @@ export default class Moviegrabber extends Plugin {
 			id: 'search-movie',
 			name: 'Search movie',
 			callback: () => {
-				if (this.settings.OMDb_API_Key == '' || this.settings.YouTube_API_Key == '') {
-					var n = new Notice("missing one or more API keys!")
+				if (this.settings.OMDb_API_Key == '') {
+					var n = new Notice("missing OMDb API key!")
 					n.noticeEl.addClass("notice_error");
 					return;
 				}
@@ -60,13 +60,23 @@ export default class Moviegrabber extends Plugin {
 
 	// search the OMDb and oben selection Modal if some are found
 	async searchOmdb(title : string, type : 'movie' | 'series') {
+		// build request URL
 		var url = new URL("http://www.omdbapi.com");
 		
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('s', title);
 		url.searchParams.append('type', type);
 
-		const response = await requestUrl(url.toString());
+		// fetch data
+		var response;
+		try {
+			response = await requestUrl(url.toString());	
+		} catch (error) {
+			var n = new Notice(`Error in request while trying to search ${type}!`);
+			n.noticeEl.addClass("notice_error");
+			return;
+		}
+		
 		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
 			n.noticeEl.addClass("notice_error");
@@ -90,13 +100,30 @@ export default class Moviegrabber extends Plugin {
 
 
 	// get the Movie Data from OMDb
-	async getOmdbData(movie : MovieSearchItem) : Promise<MovieData | null | undefined> {
+	async getOmdbData(movie : MovieSearchItem, depth : number=0) : Promise<MovieData | null | undefined> {
+		// end retries if recursion too deep.
+		if (depth >= 4) {
+			var n = new Notice(`Could not fetch Movie data: quit after ${depth+1} tries!`);
+			n.noticeEl.addClass("notice_error");
+			return null;
+		}
+
+		// build request URL
 		var url = new URL("http://www.omdbapi.com");
-		
+
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('i', movie.imdbID);
 
-		const response = await requestUrl(url.toString());
+		// fetch data
+		var response;
+
+		try {
+			response = await requestUrl(url.toString());
+		} catch (error) {
+			var n = new Notice(`Error in request while trying to fetch Movie Data!\n...retrying`);
+			return this.getOmdbData(movie, depth + 1); // retry by recursion
+		}
+		
 
 		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
@@ -115,6 +142,7 @@ export default class Moviegrabber extends Plugin {
 		return data as MovieData;
 	}
 
+	// get the trailer embed from youtube.
 	async getTrailerEmbed(title : string, year : number) : Promise<string> {
 		var url = new URL("https://www.googleapis.com/youtube/v3/search");
 
@@ -123,8 +151,17 @@ export default class Moviegrabber extends Plugin {
 		url.searchParams.append("type", "video")
 		url.searchParams.append("q", `${title} ${year} trailer`)
 
-		const response = await requestUrl(url.toString());
 
+		var response;
+		try {
+			response = await requestUrl(url.toString());	
+		} catch (error) {
+			var n = new Notice(`Error while trying to fetch Youtube trailer embed!`);
+			n.noticeEl.addClass("notice_error");
+			return "Could not find trailer."
+		}
+		
+		// something went wrong doing the request.
 		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
 			n.noticeEl.addClass("notice_error");
@@ -194,7 +231,7 @@ export default class Moviegrabber extends Plugin {
 		`seen:\n`+
 		`rating: \n`+
 		`found_at: \n`+
-		`trailer_embed: ${await this.getTrailerEmbed(itemData.Title, itemData.Year)}\n`+
+		(this.settings.YouTube_API_Key != '' ? `trailer_embed: ${await this.getTrailerEmbed(itemData.Title, itemData.Year)}\n` : '') +
 		`poster: "${itemData.Poster}"\n`+
 		`availability:\n`+
 		`---\n`+
@@ -255,7 +292,7 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 		
 		new Setting(containerEl)
 			.setName('Youtube API key')
-			.setDesc('Your API key for Youtube')
+			.setDesc('Your API key for Youtube (optional)')
 			.addText(text => text
 				.setPlaceholder('')
 				.setValue(this.plugin.settings.YouTube_API_Key)
