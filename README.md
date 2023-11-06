@@ -1,6 +1,6 @@
 # Obsidian Moviegrabber
 
-A plugin to generate notes for movies and series with properties that can be used with [dataview](https://github.com/blacksmithgu/obsidian-dataview). Uses the [Open Movie Database (OMDb) API](http://www.omdbapi.com/) to retrieve movie/series data and the [Youtube Data API](https://developers.google.com/youtube/v3/docs?hl=de) to get the embed links for the trailers.
+A plugin to generate notes for movies and series with properties that can be used with [dataview](https://github.com/blacksmithgu/obsidian-dataview). Uses the [Open Movie Database (OMDb) API](http://www.omdbapi.com/) to retrieve movie/series data and the [Youtube Data API](https://developers.google.com/youtube/v3/docs?hl=de) to get the embed links for the trailers (optional).
 
 <p float="left">
 	<img src="https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/3df2496a-ad9c-46ec-a806-b048100e7d70" width="41%">
@@ -18,6 +18,39 @@ https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/28e2ca9d-
 To use this plugin you need to create an API key for the OMDb [here](http://www.omdbapi.com/apikey.aspx) and also a Youtube Data API Key as described [here](https://developers.google.com/youtube/v3/docs#calling-the-api). and set these in the plugin settings.
 
 To search for a movie or series, simply call the command `Search movie` or `Search series`
+
+## Templates
+
+To define how the data will be saved in your notes you can define a template. This template uses tags of the form `{{tag}}` to fill in the data. The available tags are:
+```
+{{Title}}
+{{Year}}
+{{Rated}}
+{{Runtime}}
+{{Genre}}
+{{Director}}
+{{Writer}}
+{{Actors}}
+{{Plot}}
+{{Language}}
+{{Country}}
+{{Awards}}
+{{Poster}}
+{{Ratings}}
+{{Metascore}}
+{{imdbRating}}
+{{imdbVotes}}
+{{imdbID}}
+{{Type}}
+{{DVD}}
+{{BoxOffice}}
+{{Production}}
+{{Website}}
+{{totalSeasons}}
+{{YoutubeEmbed}}
+```
+
+You can generate an example template in the plugin settings. If no template is given, this default template is used.
 
 # Using the generated notes with Dataview and custom CSS
 
@@ -47,7 +80,3 @@ FROM "Movies" WHERE type = "movie" AND seen = Null
 ````
 
 Note that the cards need at least ``country, year, length, trailer_embed`` in the querry to show a card.
-
-# Disclaimer
-
-Right now the properties generated do not make full use of all the data available from OMDb and is set up such that it works best for my personal use case. If there is interest in this plugin and using the rest of the data please let me know.
