@@ -45,3 +45,85 @@ If your plugin does not need CSS, delete this file.
 .preview_Year{
     font-size: small;
 }
+
+/* -------------------------------------------------- */
+/* ------------ Moviegrabber Gallery View ----------- */
+/* -------------------------------------------------- */
+
+.moviegrabber-gallery-cardbox{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    
+    width: 100%;
+}
+
+.moviegrabber-card-outerbody{
+    display: flex;
+    flex-direction: column;
+
+    margin: var(--size-4-6);
+	height: calc(--size-4-18 + 2* --size-4-12 + 512)px;
+	width: 400px;
+    background-color: var(--background-secondary) !important;
+	box-shadow: 10px 11px 19px -1px #070202;
+}
+
+.moviegrabber-card-titlebox{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: var(--size-4-18) !important ;
+
+    background-color: var(--background-secondary-alt);
+	border: 1px solid rgb(48, 48, 48) !important;
+    box-shadow: 5px 5px 30px -10px #070202;
+}
+
+.moviegrabber-card-titletext{
+    font-weight: bold !important;
+    color: var(--text-accent) !important;
+    display: flex;
+}
+
+
+.moviegrabber-card-toprow{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+    max-height: var(--size-4-12);
+
+    padding-right: var(--size-4-2);
+    padding-left:  var(--size-4-2);
+}
+
+.moviegrabber-card-countryyearbox{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    max-width: 70%;
+}
+
+.moviegrabber-card-country{
+    font-weight: bold !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.moviegrabber-card-year{
+
+}
+
+.moviegrabber-card-length{
+    float: right;
+}
+
+.moviegrabber-card-poster{
+    width: 100%;
+}

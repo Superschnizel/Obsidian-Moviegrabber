@@ -1,9 +1,10 @@
-import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, RequestUrlResponse, TFile } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, WorkspaceLeaf, TFile } from 'obsidian';
 
 import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
 import {MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
+import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView';
 
 export default class Moviegrabber extends Plugin {
 	settings: MoviegrabberSettings;
@@ -11,7 +12,7 @@ export default class Moviegrabber extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		
-		// This adds a simple command that can be triggered anywhere
+		// Search-Movie command
 		this.addCommand({
 			id: 'search-movie',
 			name: 'Search movie',
@@ -27,6 +28,7 @@ export default class Moviegrabber extends Plugin {
 			}
 		});
 
+		// Search-Series command
 		this.addCommand({
 			id: 'search-series',
 			name: 'Search series',
@@ -40,6 +42,15 @@ export default class Moviegrabber extends Plugin {
 					{this.searchOmdb(result, 'series');
 				}).open();
 			}
+		});
+
+		// add View and Ribbon Icon:
+		this.registerView(
+			VIEW_TYPE_MOVIE_GALLERY,
+			(leaf) => new MovieGalleryView(leaf, this.settings)
+		);
+		this.addRibbonIcon("dice", "Open movie gallery", () => {
+			this.activateView();
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
@@ -335,6 +346,30 @@ export default class Moviegrabber extends Plugin {
 		path = path != '' ? `${path.replace(/\/$/, "")}` : ''; // trim "/"
 		return path;
 	}
+
+	async activateView() {
+		let { workspace }  = this.app;
+	
+		let leaf: WorkspaceLeaf;
+		let leaves = workspace.getLeavesOfType(VIEW_TYPE_MOVIE_GALLERY);
+	
+		if (leaves.length > 0) {
+			// A leaf with our view already exists, use that
+			leaf = leaves[0];
+			workspace.revealLeaf(leaf);
+			return
+		} 
+		
+		// Our view could not be found in the workspace, create a new leaf
+		// in the right sidebar for it
+		leaf = workspace.getLeaf(false);
+		await leaf.setViewState({ type: VIEW_TYPE_MOVIE_GALLERY, active: true });
+		workspace.revealLeaf(leaf);
+		
+	
+		// "Reveal" the leaf in case it is in a collapsed sidebar
+		
+	  }
 }
 
 class MoviegrabberSettingTab extends PluginSettingTab {
