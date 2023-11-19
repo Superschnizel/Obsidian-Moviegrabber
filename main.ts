@@ -48,13 +48,13 @@ export default class Moviegrabber extends Plugin {
 		});
 
 		// add View and Ribbon Icon:
-		this.registerView(
-			VIEW_TYPE_MOVIE_GALLERY,
-			(leaf) => new MovieGalleryView(leaf, this.settings)
-		);
-		this.addRibbonIcon("dice", "Open movie gallery", () => {
-			this.activateView();
-		});
+		// this.registerView(
+		// 	VIEW_TYPE_MOVIE_GALLERY,
+		// 	(leaf) => new MovieGalleryView(leaf, this.settings)
+		// );
+		// this.addRibbonIcon("dice", "Open movie gallery", () => {
+		// 	this.activateView();
+		// });
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new MoviegrabberSettingTab(this.app, this));
