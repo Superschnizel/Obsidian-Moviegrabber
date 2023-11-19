@@ -52,7 +52,7 @@ To define how the data will be saved in your notes you can define a template. Th
 
 You can generate an example template in the plugin settings. If no template is given, this default template is used.
 
-# Regenerating notes
+## Regenerating notes
 
 When trying to create a note for a movie that already exists you will be asked if you want to overwrite the existing note. If you want to keep something from the old note in the newly generated one you can make use of the delimiter string:
 
