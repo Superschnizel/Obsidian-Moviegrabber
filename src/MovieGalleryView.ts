@@ -67,8 +67,7 @@ export class MovieGalleryView extends ItemView {
     // <a data-tooltip-position="top" aria-label="Movies/Alien vs. Predator.md" data-href="Movies/Alien vs. Predator.md" href="Movies/Alien vs. Predator.md" class="internal-link" target="_blank" rel="noopener">Alien vs. Predator</a>
     const titlebox = card.createDiv({cls: "moviegrabber-card-titlebox"});
     MarkdownRenderer.render(this.app, `[[${data.title}]]`, titlebox, normalizePath(internalLink), this)
-    
-    
+        
     //     .createEl("span", {text: data.Title ,cls: "internal-link", href: internalLink});
     // titleLink.setAttribute("data-href", internalLink);
     // titleLink.setAttribute("aria-label", internalLink);

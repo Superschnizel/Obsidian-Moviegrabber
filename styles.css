@@ -46,6 +46,10 @@ If your plugin does not need CSS, delete this file.
     font-size: small;
 }
 
+.moviegrabber-confirm-button{
+    background-color: var(--background-modifier-error);
+}
+
 /* -------------------------------------------------- */
 /* ------------ Moviegrabber Gallery View ----------- */
 /* -------------------------------------------------- */

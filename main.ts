@@ -5,6 +5,9 @@ import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
 import {MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
 import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView';
+import { ConfirmOverwriteModal } from 'src/ConfirmOverwriteModal';
+
+const OVERWRITE_DELIMITER = /%%==MOVIEGRABBER_KEEP==%%[\s\S]*/
 
 export default class Moviegrabber extends Plugin {
 	settings: MoviegrabberSettings;
@@ -110,11 +113,9 @@ export default class Moviegrabber extends Plugin {
 
 		new MoviegrabberSelectionModal(this.app, data as MovieSearch, (result) =>
 			{
-				this.createNote(result, type);
+				this.tryCreateNote(result, type);
 			}).open();
 	}
-
-
 
 	// get the Movie Data from OMDb
 	async getOmdbData(movie : MovieSearchItem, depth : number=0) : Promise<MovieData | null | undefined> {
@@ -198,13 +199,13 @@ export default class Moviegrabber extends Plugin {
 		return embed;
 	}
 
-	async createNote(item : MovieSearchItem, type : 'movie' | 'series') {
+	async tryCreateNote(item : MovieSearchItem, type : 'movie' | 'series') {
 		// create path and check for directory before posting the request
 
 		var dir = type == 'movie' ? this.settings.MovieDirectory : this.settings.SeriesDirectory;
 		
 		dir = this.CleanPath(dir);
-		dir = dir != '' ? `/${dir}/` : ''; // this might be unecessary.
+		dir = dir != '' ? `${dir}/` : ''; // this might be unecessary.
 		
 		if (!(await this.app.vault.adapter.exists(dir))) {
 			var n = new Notice(`Folder for ${type}: ${dir} does not exist!`)
@@ -212,14 +213,22 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 
-		var path = `${dir}${item.Title.replace(/[/\\?%*:|"<>]/g, '')}.md`
-		
-		if (this.app.vault.getAbstractFileByPath(path) != null) {
-			var n = new Notice(`Note for ${item.Title} already exists!`);
-			n.noticeEl.addClass("notice_error");
+		let path = `${dir}${item.Title.replace(/[/\\?%*:|"<>]/g, '')}.md`
+		let file = this.app.vault.getAbstractFileByPath(path);
+
+		console.log(`${file}, path: ${path}`);
+		if (file != null && file instanceof TFile) {
+			new ConfirmOverwriteModal(this.app, item, () => {
+				this.createNote(item, type, path, file as TFile);
+			}).open();
 			return;
 		}
 
+		this.createNote(item, type, path);
+	}
+
+	async createNote(item : MovieSearchItem, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
+		
 		var itemData = await this.getOmdbData(item);
 		
 		if (itemData == null){
@@ -243,7 +252,8 @@ export default class Moviegrabber extends Plugin {
 		if (template == null) {
 			return;
 		}
-		var content = await this.FillTemplate(template, itemData)
+		var content = await this.FillTemplate(template, itemData);
+		
 		/* var content = 
 		`---\n`+
 		`type: ${type}\n`+
@@ -265,7 +275,16 @@ export default class Moviegrabber extends Plugin {
 		`${itemData.Plot}` */
 
 		// create and open file
-		var tFile = await this.app.vault.create(path, content);
+		if (tFile == null) {
+			tFile = await this.app.vault.create(path, content);
+		} else {
+			let oldContent = await this.app.vault.read(tFile);
+			// find delimiter string if it exists and keep whatever is below.
+			let toKeep = OVERWRITE_DELIMITER.exec(oldContent);
+
+			this.app.vault.modify(tFile, content + '\n' + toKeep);
+		}
+
 		if (this.settings.SwitchToCreatedNote) {
 			this.app.workspace.getLeaf().openFile(tFile);
 		}
@@ -281,7 +300,7 @@ export default class Moviegrabber extends Plugin {
 		var path = type == 'movie' ? this.settings.MovieTemplatePath : this.settings.SeriesTemplatePath;
 		path = this.CleanPath(path).replace(".md", '') + '.md';
 
-		var tAbstractFile = await this.app.vault.getAbstractFileByPath(path);
+		var tAbstractFile = this.app.vault.getAbstractFileByPath(path);
 		if (tAbstractFile == null || !(tAbstractFile instanceof TFile)) {
 			this.SendWarningNotice("Template Path is not a File in Vault.\nstopping")
 			return null;
