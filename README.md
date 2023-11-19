@@ -52,6 +52,15 @@ To define how the data will be saved in your notes you can define a template. Th
 
 You can generate an example template in the plugin settings. If no template is given, this default template is used.
 
+# Regenerating notes
+
+When trying to create a note for a movie that already exists you will be asked if you want to overwrite the existing note. If you want to keep something from the old note in the newly generated one you can make use of the delimiter string:
+
+```
+%%==MOVIEGRABBER_KEEP==%%
+```
+Everything below this will be transfered to the new note when overwriting.
+
 # Using the generated notes with Dataview and custom CSS
 
 Using a [dataview](https://github.com/blacksmithgu/) table in combination with a custom [css snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets), you can use these notes to create an interactive display for your movies.
