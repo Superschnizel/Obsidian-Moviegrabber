@@ -8,6 +8,7 @@ import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView'
 import { ConfirmOverwriteModal } from 'src/ConfirmOverwriteModal';
 
 const OVERWRITE_DELIMITER = /%%==MOVIEGRABBER_KEEP==%%[\s\S]*/
+const IMDBID_REGEX = /^ev\d{1,7}\/\d{4}(-\d)?$|^(ch|co|ev|nm|tt)\d{1,7}$/
 
 export default class Moviegrabber extends Plugin {
 	settings: MoviegrabberSettings;
@@ -86,6 +87,8 @@ export default class Moviegrabber extends Plugin {
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('s', title);
 		url.searchParams.append('type', type);
+
+		console.log(`requesting: ${url}`);
 
 		// fetch data
 		var response;
@@ -216,7 +219,7 @@ export default class Moviegrabber extends Plugin {
 		let path = `${dir}${item.Title.replace(/[/\\?%*:|"<>]/g, '')}.md`
 		let file = this.app.vault.getAbstractFileByPath(path);
 
-		console.log(`${file}, path: ${path}`);
+		// console.log(`${file}, path: ${path}`);
 		if (file != null && file instanceof TFile) {
 			new ConfirmOverwriteModal(this.app, item, () => {
 				this.createNote(item, type, path, file as TFile);
