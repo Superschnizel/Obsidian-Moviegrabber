@@ -50,6 +50,29 @@ If your plugin does not need CSS, delete this file.
     background-color: var(--background-modifier-error);
 }
 
+.confirm_preview_item{
+    min-height: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.confirm_preview_img {
+    max-height: 224px;
+}
+
+.confirm_preview_Text{
+    margin: var(--size-4-1);
+    display: flex;
+    align-items: center;
+}
+
+.confirm_preview_Year{
+    font-size: small;
+    margin-left: var(--size-4-1);
+}
+
 /* -------------------------------------------------- */
 /* ------------ Moviegrabber Gallery View ----------- */
 /* -------------------------------------------------- */

@@ -6,6 +6,7 @@ import {MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/Movieg
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
 import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView';
 import { ConfirmOverwriteModal } from 'src/ConfirmOverwriteModal';
+import { ConfirmCreateNoteModal } from 'src/ConfirmCreateNoteModal';
 
 const OVERWRITE_DELIMITER = /%%==MOVIEGRABBER_KEEP==%%[\s\S]*/
 const IMDBID_REGEX = /^ev\d{1,7}\/\d{4}(-\d)?$|^(ch|co|ev|nm|tt)\d{1,7}$/
@@ -81,14 +82,17 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 		
+		// check if search string is valid IMDB-id
+		let isImdbId = IMDBID_REGEX.test(title);
+
 		// build request URL
 		var url = new URL("http://www.omdbapi.com");
 		
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
-		url.searchParams.append('s', title);
+		url.searchParams.append(isImdbId ? 'i' : 's', title);
 		url.searchParams.append('type', type);
 
-		console.log(`requesting: ${url}`);
+		// console.log(`requesting: ${url}`);
 
 		// fetch data
 		var response;
@@ -114,6 +118,13 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 
+		if (isImdbId) {
+			let movie = data as MovieData;
+			new ConfirmCreateNoteModal(this.app, movie, () =>{
+				this.tryCreateNote(movie, type);
+			}).open();
+			return;
+		}
 		new MoviegrabberSelectionModal(this.app, data as MovieSearch, (result) =>
 			{
 				this.tryCreateNote(result, type);
@@ -202,7 +213,7 @@ export default class Moviegrabber extends Plugin {
 		return embed;
 	}
 
-	async tryCreateNote(item : MovieSearchItem, type : 'movie' | 'series') {
+	async tryCreateNote(item : MovieSearchItem | MovieData, type : 'movie' | 'series') {
 		// create path and check for directory before posting the request
 
 		var dir = type == 'movie' ? this.settings.MovieDirectory : this.settings.SeriesDirectory;
@@ -230,9 +241,9 @@ export default class Moviegrabber extends Plugin {
 		this.createNote(item, type, path);
 	}
 
-	async createNote(item : MovieSearchItem, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
+	async createNote(item : MovieSearchItem | MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
 		
-		var itemData = await this.getOmdbData(item);
+		var itemData = ('Response' in item ) ? item : await this.getOmdbData(item);
 		
 		if (itemData == null){
 			var n = new Notice(`something went wrong in fetching ${item.Title} data`)
@@ -285,7 +296,7 @@ export default class Moviegrabber extends Plugin {
 			// find delimiter string if it exists and keep whatever is below.
 			let toKeep = OVERWRITE_DELIMITER.exec(oldContent);
 
-			this.app.vault.modify(tFile, content + '\n' + toKeep);
+			this.app.vault.modify(tFile, content + '\n' + (toKeep != null ? toKeep : ''));
 		}
 
 		if (this.settings.SwitchToCreatedNote) {
