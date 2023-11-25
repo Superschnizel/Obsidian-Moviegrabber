@@ -321,7 +321,24 @@ export default class Moviegrabber extends Plugin {
 
 	async FillTemplate(template : string, data : MovieData) : Promise<string> {
 		return template.replace(/{{(.*?)}}/g, (match) => {
-			return data[match.split(/{{|}}/).filter(Boolean)[0].trim()]
+			let inner = match.split(/{{|}}/).filter(Boolean)[0];
+			let split = inner.split(/(?<!\\)\|/); // split at not escaped "|"
+			
+			let result = '';
+			// handle the data being a list.
+			let items = data[split[0].trim()].split(/\,\s?/);
+			result += split.length >= 2 ? split[1] : ''; 	// prefix
+			result += items[0];			 					// data
+			result += split.length >= 3 ? split[2] : '';	// suffix
+
+			for (let i = 1; i < items.length; i++) {
+				result += ',';
+				result += split.length >= 2 ? split[1] : ''; 	// prefix
+				result += items[i];			 					// data
+				result += split.length >= 3 ? split[2] : '';	// suffix
+			}
+
+			return result
 		});
 	}
 
