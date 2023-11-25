@@ -49,6 +49,7 @@ To define how the data will be saved in your notes you can define a template. Th
 {{totalSeasons}}
 {{YoutubeEmbed}}
 ```
+Additionally you can define a pre- and suffix to be applied to the data. this is done by using `{{tag|prefix|suffix}}`. *(if you want to use the "|" character, it can be escaped using "\|")*.
 
 You can generate an example template in the plugin settings. If no template is given, this default template is used.
 

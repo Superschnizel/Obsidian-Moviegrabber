@@ -323,19 +323,21 @@ export default class Moviegrabber extends Plugin {
 		return template.replace(/{{(.*?)}}/g, (match) => {
 			let inner = match.split(/{{|}}/).filter(Boolean)[0];
 			let split = inner.split(/(?<!\\)\|/); // split at not escaped "|"
-			
+			const prefix = split.length >= 2 ? split[1].replace(/\\\|/, '|') : '';
+			const suffix = split.length >= 3 ? split[2].replace(/\\\|/, '|') : '';
+
 			let result = '';
 			// handle the data being a list.
 			let items = data[split[0].trim()].split(/\,\s?/);
-			result += split.length >= 2 ? split[1] : ''; 	// prefix
-			result += items[0];			 					// data
-			result += split.length >= 3 ? split[2] : '';	// suffix
+			result += prefix;
+			result += items[0];	// data
+			result += suffix;
 
 			for (let i = 1; i < items.length; i++) {
 				result += ',';
-				result += split.length >= 2 ? split[1] : ''; 	// prefix
-				result += items[i];			 					// data
-				result += split.length >= 3 ? split[2] : '';	// suffix
+				result += prefix;
+				result += items[i]; // data
+				result += suffix;
 			}
 
 			return result
