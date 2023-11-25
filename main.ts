@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, WorkspaceLeaf, TFile } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, WorkspaceLeaf, TFile, TAbstractFile } from 'obsidian';
 
 import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
@@ -48,15 +48,6 @@ export default class Moviegrabber extends Plugin {
 				}).open();
 			}
 		});
-
-		// add View and Ribbon Icon:
-		// this.registerView(
-		// 	VIEW_TYPE_MOVIE_GALLERY,
-		// 	(leaf) => new MovieGalleryView(leaf, this.settings)
-		// );
-		// this.addRibbonIcon("dice", "Open movie gallery", () => {
-		// 	this.activateView();
-		// });
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new MoviegrabberSettingTab(this.app, this));
@@ -297,6 +288,9 @@ export default class Moviegrabber extends Plugin {
 			let toKeep = OVERWRITE_DELIMITER.exec(oldContent);
 
 			this.app.vault.modify(tFile, content + '\n' + (toKeep != null ? toKeep : ''));
+
+			// trigger "create" Event to assure compatibility with other plugins, like templater
+			this.app.vault.trigger("create", tFile);
 		}
 
 		if (this.settings.SwitchToCreatedNote) {

@@ -20,19 +20,19 @@ export class MoviegrabberSelectionModal extends SuggestModal<MovieSearchItem> {
       }
     
       // Renders each Movie
-      renderSuggestion(movie: MovieSearchItem, el: HTMLElement) {
-        var d = el.createEl("div", {cls: "preview_list_item"})
-        d.createEl("img", { 
-            attr: {src : movie.Poster},
-            cls : "preview_img"}
-            );
-        var dd = d.createEl("div", {cls : "preview_Text"});
-        dd.createEl("div", { text: movie.Title , cls : "preview_Title"});
-        dd.createEl("small", { text: `(${movie.Year})`, cls : "preview_Year" });
-      }
+    renderSuggestion(movie: MovieSearchItem, el: HTMLElement) {
+      var d = el.createEl("div", {cls: "preview_list_item"})
+      d.createEl("img", { 
+          attr: {src : movie.Poster},
+          cls : "preview_img"}
+          );
+      var dd = d.createEl("div", {cls : "preview_Text"});
+      dd.createEl("div", { text: movie.Title , cls : "preview_Title"});
+      dd.createEl("small", { text: `(${movie.Year})`, cls : "preview_Year" });
+    }
     
       // Perform action on the selected suggestion.
-      onChooseSuggestion(movie: MovieSearchItem, evt: MouseEvent | KeyboardEvent) {
-        this.onSubmit(movie);
-      }
+    onChooseSuggestion(movie: MovieSearchItem, evt: MouseEvent | KeyboardEvent) {
+      this.onSubmit(movie);
+    }
   }
