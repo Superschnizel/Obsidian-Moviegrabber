@@ -7,6 +7,8 @@ import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
 import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView';
 import { ConfirmOverwriteModal } from 'src/ConfirmOverwriteModal';
 import { ConfirmCreateNoteModal } from 'src/ConfirmCreateNoteModal';
+import { FolderSuggest } from 'src/interface/FolderSuggester';
+import { FileSuggest } from 'src/interface/FileSuggester';
 
 const OVERWRITE_DELIMITER = /%%==MOVIEGRABBER_KEEP==%%[\s\S]*/
 const IMDBID_REGEX = /^ev\d{1,7}\/\d{4}(-\d)?$|^(ch|co|ev|nm|tt)\d{1,7}$/
@@ -440,24 +442,29 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Movie folder')
 			.setDesc('Folder in which to save the generated notes for series')
-			.addText(text => text
-				.setPlaceholder('Movies')
-				.setValue(this.plugin.settings.MovieDirectory)
-				.onChange(async (value) => {
-					this.plugin.settings.MovieDirectory = value;
-					await this.plugin.saveSettings();
-				}));
+			.addSearch((cb) => {
+                new FolderSuggest(cb.inputEl, this.plugin.app);
+                cb.setPlaceholder("Example: folder1/folder2")
+                    .setValue(this.plugin.settings.MovieDirectory)
+                    .onChange(async (newFolder) => {
+                        this.plugin.settings.MovieDirectory = newFolder;
+                        await this.plugin.saveSettings();
+                    });
+				});
+			
 		
 		new Setting(containerEl)
 			.setName('Series folder')
 			.setDesc('Folder in which to save the generated notes for series')
-			.addText(text => text
-				.setPlaceholder('Series')
-				.setValue(this.plugin.settings.SeriesDirectory)
-				.onChange(async (value) => {
-					this.plugin.settings.SeriesDirectory = value;
-					await this.plugin.saveSettings();
-				}));
+			.addSearch((cb) => {
+                new FolderSuggest(cb.inputEl, this.plugin.app);
+                cb.setPlaceholder("Example: folder1/folder2")
+                    .setValue(this.plugin.settings.SeriesDirectory)
+                    .onChange(async (newFolder) => {
+                        this.plugin.settings.SeriesDirectory = newFolder;
+                        await this.plugin.saveSettings();
+                    });
+				});
 
 		new Setting(containerEl)
 			.setName('OMDb API key')
@@ -495,24 +502,29 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Movie template file path')
 			.setDesc('Path to the template file that is used to create notes for movies')
-			.addText(text => text
-				.setPlaceholder('')
-				.setValue(this.plugin.settings.MovieTemplatePath)
-				.onChange(async (value) => {
-					this.plugin.settings.MovieTemplatePath = value;
-					await this.plugin.saveSettings();
-				}));
+			.addSearch((cb) => {
+                new FileSuggest(cb.inputEl, this.plugin.app);
+                cb.setPlaceholder("Example: folder1/folder2")
+                    .setValue(this.plugin.settings.MovieTemplatePath)
+                    .onChange(async (newFile) => {
+                        this.plugin.settings.MovieTemplatePath = newFile;
+                        await this.plugin.saveSettings();
+                    });
+				});
 		
 		new Setting(containerEl)
 			.setName('Series template file path')
 			.setDesc('Path to the template file that is used to create notes for series')
-			.addText(text => text
-				.setPlaceholder('')
-				.setValue(this.plugin.settings.SeriesTemplatePath)
-				.onChange(async (value) => {
-					this.plugin.settings.SeriesTemplatePath = value;
-					await this.plugin.saveSettings();
-				}));
+			.addSearch((cb) => {
+                new FileSuggest(cb.inputEl, this.plugin.app);
+                cb.setPlaceholder("Example: folder1/folder2")
+                    .setValue(this.plugin.settings.SeriesTemplatePath)
+                    .onChange(async (newFile) => {
+                        this.plugin.settings.SeriesTemplatePath = newFile;
+                        await this.plugin.saveSettings();
+                    });
+				});
+		
 		new Setting(containerEl)
 			.setName('Create example template file')
 			.setDesc('Creates an example template file to expand and use.\nThe file is called `/Moviegrabber-example-template`')
