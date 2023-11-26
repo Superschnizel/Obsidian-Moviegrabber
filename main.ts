@@ -2,7 +2,7 @@ import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTa
 
 import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
-import {MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
+import {MOVIE_DATA_LOWER, MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
 import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView';
 import { ConfirmOverwriteModal } from 'src/ConfirmOverwriteModal';
@@ -328,7 +328,13 @@ export default class Moviegrabber extends Plugin {
 
 			let result = '';
 			// handle the data being a list.
-			let items = data[split[0].trim()].split(/\,\s?/);
+			let name = MOVIE_DATA_LOWER[split[0].trim().toLowerCase()];
+			let items = data[name]?.split(/\,\s?/);
+			if (!items) {
+				console.log(`Tag "{{${inner}}}" could not be resolved.`);
+				this.SendWarningNotice(`Tag "{{${inner}}}" could not be resolved.`);
+				return `{{${inner}}}`;
+			}
 			result += prefix;
 			result += items[0];	// data
 			result += suffix;

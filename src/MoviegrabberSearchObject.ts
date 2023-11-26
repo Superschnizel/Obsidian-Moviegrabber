@@ -42,6 +42,40 @@ export interface MovieData{
     YoutubeEmbed: string
   }
 
+interface MovieDataLowercase {
+    [key:string]: string
+}
+
+// this is used to make tags case insensitive
+export const MOVIE_DATA_LOWER : MovieDataLowercase = {
+    "title" : "Title",
+    "year" : "Year",
+    "rated" : "Rated",
+    "runtime" : "Runtime",
+    "genre" : "Genre",
+    "director" : "Director",
+    "writer" : "Writer",
+    "actors" : "Actors",
+    "plot" : "Plot",
+    "language" : "Language",
+    "country" : "Country",
+    "awards" : "Awards",
+    "poster" : "Poster",
+    "ratings" : "Ratings",
+    "metascore" : "Metascore",
+    "imdbrating" : "imdbRating",
+    "imdbvotes" : "imdbVotes",
+    "imdbid" : "imdbID",
+    "type" : "Type",
+    "dvd" : "DVD",
+    "boxoffice" : "BoxOffice",
+    "production" : "Production",
+    "website" : "Website",
+    "totalseasons" : "totalSeasons",
+    "response" : "Response",
+    "youtubeembed" : "YoutubeEmbed", 
+}
+
 export const TEST_SEARCH : MovieSearch = {
     "Search": [
         {
