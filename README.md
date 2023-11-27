@@ -15,7 +15,7 @@ https://github.com/Superschnizel/Obsidian-Moviegrabber/assets/47162464/28e2ca9d-
 
 *(Disclaimer: the choice selection uses outside assets for the movie posters in the preview, retrieved in the search request to OMDb)*
 
-To use this plugin you need to create an API key for the OMDb [here](http://www.omdbapi.com/apikey.aspx) and also a Youtube Data API Key as described [here](https://developers.google.com/youtube/v3/docs#calling-the-api). and set these in the plugin settings.
+To use this plugin you need to create an API key for the OMDb [here](http://www.omdbapi.com/apikey.aspx) and optionally also a Youtube Data API Key as described [here](https://developers.google.com/youtube/v3/docs#calling-the-api). and set these in the plugin settings.
 
 To search for a movie or series, simply call the command `Search movie` or `Search series` and search a movie by entering a title or a valid IMDB-id.
 
