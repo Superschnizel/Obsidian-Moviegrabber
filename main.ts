@@ -2,7 +2,7 @@ import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTa
 
 import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
-import {MOVIE_DATA_LOWER, MovieData, MovieSearch, MovieSearchItem, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
+import {MOVIE_DATA_LOWER, MovieData, MovieRating, MovieSearch, MovieSearchItem, Rating, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
 import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView';
 import { ConfirmOverwriteModal } from 'src/ConfirmOverwriteModal';
@@ -323,7 +323,11 @@ export default class Moviegrabber extends Plugin {
 
 	async FillTemplate(template : string, data : MovieData) : Promise<string> {
 		return template.replace(/{{(.*?)}}/g, (match) => {
+			// console.log(match);
 			let inner = match.split(/{{|}}/).filter(Boolean)[0];
+			if (!inner) {
+				return match;
+			}
 			let split = inner.split(/(?<!\\)\|/); // split at not escaped "|"
 			const prefix = split.length >= 2 ? split[1].replace(/\\\|/, '|') : '';
 			const suffix = split.length >= 3 ? split[2].replace(/\\\|/, '|') : '';
@@ -331,12 +335,23 @@ export default class Moviegrabber extends Plugin {
 			let result = '';
 			// handle the data being a list.
 			let name = MOVIE_DATA_LOWER[split[0].trim().toLowerCase()];
-			let items = data[name]?.split(/\,\s?/);
+			// console.log(`${name}, --> ${data[name]}`);
+
+			let rawData = data[name];
+
+			let items = rawData instanceof Array 
+						? rawData.map( (elem) : string => {
+							let r = elem as MovieRating;
+							return `${r.Source}: ${r.Value}`;
+						}) 
+						: rawData?.split(/\,\s?/);
+
 			if (!items) {
 				console.log(`Tag "{{${inner}}}" could not be resolved.`);
-				this.SendWarningNotice(`Tag "{{${inner}}}" could not be resolved.`);
+				new Notice(`Warning: Tag "{{${inner}}}" could not be resolved.`)
 				return `{{${inner}}}`;
 			}
+
 			result += prefix;
 			result += items[0];	// data
 			result += suffix;

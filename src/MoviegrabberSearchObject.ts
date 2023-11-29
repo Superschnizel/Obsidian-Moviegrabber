@@ -27,7 +27,7 @@ export interface MovieData{
     Country: string,
     Awards: string,
     Poster: string,
-    Ratings: Array<any>,
+    Ratings: Array<MovieRating>,
     Metascore: number,
     imdbRating: number,
     imdbVotes: number,
@@ -41,6 +41,19 @@ export interface MovieData{
     Response: boolean,
     YoutubeEmbed: string
   }
+
+export interface MovieRating{
+    Source : string;
+    Value: string;
+}
+
+export class Rating implements MovieRating {
+    Source: string;
+    Value: string;
+    public toString = () : string => {
+        return `${this.Source}: ${this.Value}`;
+    }
+}
 
 interface MovieDataLowercase {
     [key:string]: string
