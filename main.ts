@@ -138,6 +138,7 @@ export default class Moviegrabber extends Plugin {
 
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('i', movie.imdbID);
+		url.searchParams.append('plot', this.settings.PlotLength);
 
 		// fetch data
 		var response;
@@ -502,6 +503,18 @@ class MoviegrabberSettingTab extends PluginSettingTab {
 					this.plugin.settings.YouTube_API_Key = value;
 					await this.plugin.saveSettings();
 				}));
+		
+		new Setting(containerEl)
+			.setName('Plot length')
+			.setDesc('choose the plot length option for Omdb.')
+			.addDropdown(dropDown => dropDown
+				.addOption('short', 'short')
+				.addOption('full', 'full')
+				.setValue(this.plugin.settings.PlotLength)
+				.onChange(async (value) => {
+					this.plugin.settings.PlotLength = value;
+					await this.plugin.saveSettings();
+				}))
 
 		new Setting(containerEl)
 			.setName('Switch to generated notes')

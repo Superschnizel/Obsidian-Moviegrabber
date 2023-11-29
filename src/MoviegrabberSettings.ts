@@ -7,6 +7,8 @@ export interface MoviegrabberSettings {
 
 	MovieTemplatePath: string;
 	SeriesTemplatePath: string;
+
+	PlotLength: string;
 }
 
 export const DEFAULT_SETTINGS: MoviegrabberSettings = {
@@ -16,7 +18,8 @@ export const DEFAULT_SETTINGS: MoviegrabberSettings = {
 	YouTube_API_Key: '',
 	SwitchToCreatedNote: true,
 	MovieTemplatePath: '',
-	SeriesTemplatePath: ''
+	SeriesTemplatePath: '',
+	PlotLength: 'short'
 }
 
 export const DEFAULT_TEMPLATE: string = "---\n"+

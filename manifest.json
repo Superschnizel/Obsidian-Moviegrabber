@@ -1,7 +1,7 @@
 {
 	"id": "moviegrabber",
 	"name": "Moviegrabber",
-	"version": "1.1.10",
+	"version": "1.1.11",
 	"minAppVersion": "0.15.0",
 	"description": "Grab movie data from public APIs and transform it into notes that can be used with dataview and properties",
 	"author": "Superschnizel",
