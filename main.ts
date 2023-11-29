@@ -358,7 +358,7 @@ export default class Moviegrabber extends Plugin {
 			result += suffix;
 
 			for (let i = 1; i < items.length; i++) {
-				result += ',';
+				result += ', ';
 				result += prefix;
 				result += items[i]; // data
 				result += suffix;
