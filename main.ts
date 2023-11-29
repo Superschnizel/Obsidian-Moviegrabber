@@ -11,7 +11,7 @@ import { FolderSuggest } from 'src/interface/FolderSuggester';
 import { FileSuggest } from 'src/interface/FileSuggester';
 
 const OVERWRITE_DELIMITER = /%%==MOVIEGRABBER_KEEP==%%[\s\S]*/
-const IMDBID_REGEX = /^ev\d{1,7}\/\d{4}(-\d)?$|^(ch|co|ev|nm|tt)\d{1,7}$/
+const IMDBID_REGEX = /^ev\d{1,8}\/\d{4}(-\d)?$|^(ch|co|ev|nm|tt)\d{1,8}$/
 
 export default class Moviegrabber extends Plugin {
 	settings: MoviegrabberSettings;
