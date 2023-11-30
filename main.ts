@@ -1,6 +1,6 @@
 import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, WorkspaceLeaf, TFile, TAbstractFile } from 'obsidian';
 
-import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE} from "./src/MoviegrabberSettings"
+import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE, MoviegrabberSettingTab} from "./src/MoviegrabberSettings"
 import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
 import {MOVIE_DATA_LOWER, MovieData, MovieRating, MovieSearch, MovieSearchItem, Rating, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
@@ -209,6 +209,15 @@ export default class Moviegrabber extends Plugin {
 
 	async tryCreateNote(item : MovieSearchItem | MovieData, type : 'movie' | 'series') {
 		// create path and check for directory before posting the request
+		// Transform Search into MovieData
+		var itemData = ('Response' in item ) ? item as MovieData : await this.getOmdbData(item);
+		
+		if (itemData == null || itemData == undefined){
+			var n = new Notice(`something went wrong in fetching ${item.Title} data`)
+			n.noticeEl.addClass("notice_error")
+			return;
+		}
+
 
 		var dir = type == 'movie' ? this.settings.MovieDirectory : this.settings.SeriesDirectory;
 		
@@ -216,42 +225,37 @@ export default class Moviegrabber extends Plugin {
 		dir = dir != '' ? `${dir}/` : ''; // this might be unecessary.
 		
 		if (!(await this.app.vault.adapter.exists(dir))) {
-			var n = new Notice(`Folder for ${type}: ${dir} does not exist!`)
+			var n = new Notice(`Folder for ${type}: "${dir}" does not exist!`)
 			n.noticeEl.addClass("notice_error")
 			return;
 		}
 
-		let path = `${dir}${item.Title.replace(/[/\\?%*:|"<>]/g, '')}.md`
+		let title = await this.FillTemplate(this.settings.FilenameTemplate, itemData);
+		title = title == '' ? item.Title : title;
+
+		let path = `${dir}${title.replace(/[/\\?%*:|"<>]/g, '')}.md`
 		let file = this.app.vault.getAbstractFileByPath(path);
 
 		// console.log(`${file}, path: ${path}`);
 		if (file != null && file instanceof TFile) {
 			new ConfirmOverwriteModal(this.app, item, () => {
-				this.createNote(item, type, path, file as TFile);
+				this.createNote(itemData!, type, path, file as TFile);
 			}).open();
 			return;
 		}
 
-		this.createNote(item, type, path);
+		this.createNote(itemData, type, path);
 	}
 
-	async createNote(item : MovieSearchItem | MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
-		
-		var itemData = ('Response' in item ) ? item : await this.getOmdbData(item);
-		
-		if (itemData == null){
-			var n = new Notice(`something went wrong in fetching ${item.Title} data`)
-			n.noticeEl.addClass("notice_error")
-			return;
-		}
-		
+	async createNote(item : MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
+				
 		new Notice(`Creating Note for: ${item.Title} (${item.Year})`);
 
 		// add and clean up data
-		itemData.Title = itemData.Title.replace(/[/\\?%*:|"<>]/g, ''); // clean Movie Title to avoid frontmatter issues
-		itemData.Runtime = itemData.Runtime ? itemData.Runtime.split(" ")[0] : '';
+		item.Title = item.Title.replace(/[/\\?%*:|"<>]/g, ''); // clean Movie Title to avoid frontmatter issues
+		item.Runtime = item.Runtime ? item.Runtime.split(" ")[0] : '';
 		if (this.settings.YouTube_API_Key != '') {
-			itemData.YoutubeEmbed = await this.getTrailerEmbed(itemData.Title, itemData.Year);
+			item.YoutubeEmbed = await this.getTrailerEmbed(item.Title, item.Year);
 		}
 
 		// get and fill template
@@ -260,7 +264,7 @@ export default class Moviegrabber extends Plugin {
 		if (template == null) {
 			return;
 		}
-		var content = await this.FillTemplate(template, itemData);
+		var content = await this.FillTemplate(template, item);
 		
 		/* var content = 
 		`---\n`+
@@ -442,124 +446,4 @@ export default class Moviegrabber extends Plugin {
 	  }
 }
 
-class MoviegrabberSettingTab extends PluginSettingTab {
-	plugin: Moviegrabber;
 
-	constructor(app: App, plugin: Moviegrabber) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Movie folder')
-			.setDesc('Folder in which to save the generated notes for series')
-			.addSearch((cb) => {
-                new FolderSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.MovieDirectory)
-                    .onChange(async (newFolder) => {
-                        this.plugin.settings.MovieDirectory = newFolder;
-                        await this.plugin.saveSettings();
-                    });
-				});
-			
-		
-		new Setting(containerEl)
-			.setName('Series folder')
-			.setDesc('Folder in which to save the generated notes for series')
-			.addSearch((cb) => {
-                new FolderSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.SeriesDirectory)
-                    .onChange(async (newFolder) => {
-                        this.plugin.settings.SeriesDirectory = newFolder;
-                        await this.plugin.saveSettings();
-                    });
-				});
-
-		new Setting(containerEl)
-			.setName('OMDb API key')
-			.setDesc('Your API key for OMDb')
-			.addText(text => text
-				.setPlaceholder('')
-				.setValue(this.plugin.settings.OMDb_API_Key)
-				.onChange(async (value) => {
-					this.plugin.settings.OMDb_API_Key = value;
-					await this.plugin.saveSettings();
-				}));
-		
-		new Setting(containerEl)
-			.setName('Youtube API key')
-			.setDesc('Your API key for Youtube (optional)')
-			.addText(text => text
-				.setPlaceholder('')
-				.setValue(this.plugin.settings.YouTube_API_Key)
-				.onChange(async (value) => {
-					this.plugin.settings.YouTube_API_Key = value;
-					await this.plugin.saveSettings();
-				}));
-		
-		new Setting(containerEl)
-			.setName('Plot length')
-			.setDesc('choose the plot length option for Omdb.')
-			.addDropdown(dropDown => dropDown
-				.addOption('short', 'short')
-				.addOption('full', 'full')
-				.setValue(this.plugin.settings.PlotLength)
-				.onChange(async (value) => {
-					this.plugin.settings.PlotLength = value;
-					await this.plugin.saveSettings();
-				}))
-
-		new Setting(containerEl)
-			.setName('Switch to generated notes')
-			.setDesc('Automatically switch to the current workspace to the newly created note')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.SwitchToCreatedNote)
-				.onChange(async (value) => {
-					this.plugin.settings.SwitchToCreatedNote = value;
-					await this.plugin.saveSettings();
-				}));
-		
-		containerEl.createEl('h1', { text : "Templates"})
-		new Setting(containerEl)
-			.setName('Movie template file path')
-			.setDesc('Path to the template file that is used to create notes for movies')
-			.addSearch((cb) => {
-                new FileSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.MovieTemplatePath)
-                    .onChange(async (newFile) => {
-                        this.plugin.settings.MovieTemplatePath = newFile;
-                        await this.plugin.saveSettings();
-                    });
-				});
-		
-		new Setting(containerEl)
-			.setName('Series template file path')
-			.setDesc('Path to the template file that is used to create notes for series')
-			.addSearch((cb) => {
-                new FileSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.SeriesTemplatePath)
-                    .onChange(async (newFile) => {
-                        this.plugin.settings.SeriesTemplatePath = newFile;
-                        await this.plugin.saveSettings();
-                    });
-				});
-		
-		new Setting(containerEl)
-			.setName('Create example template file')
-			.setDesc('Creates an example template file to expand and use.\nThe file is called `/Moviegrabber-example-template`')
-			.addButton(btn => btn
-				.setButtonText("Create")
-				.onClick((event) => {
-					this.plugin.CreateDefaultTemplateFile();
-				}));
-	}
-}
