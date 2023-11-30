@@ -14,7 +14,8 @@ export interface MoviegrabberSettings {
 	SeriesTemplatePath: string;
 
 	PlotLength: string;
-	FilenameTemplate: string;
+	FilenameTemplateMovie: string;
+	FilenameTemplateSeries: string;
 }
 
 export const DEFAULT_SETTINGS: MoviegrabberSettings = {
@@ -26,7 +27,8 @@ export const DEFAULT_SETTINGS: MoviegrabberSettings = {
 	MovieTemplatePath: '',
 	SeriesTemplatePath: '',
 	PlotLength: 'short',
-	FilenameTemplate: '{{Title}}'
+	FilenameTemplateMovie: '{{Title}}',
+	FilenameTemplateSeries: '{{Title}}'
 }
 
 export const DEFAULT_TEMPLATE: string = "---\n"+
@@ -168,13 +170,24 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 				}));
 		
 		new Setting(containerEl)
-			.setName('Filename Template')
+			.setName('Movie filename template')
 			.setDesc('Template used for the filename of Movienotes. Used same template tags as other files.')
 			.addText(text => text
 				.setPlaceholder('')
-				.setValue(this.plugin.settings.FilenameTemplate)
+				.setValue(this.plugin.settings.FilenameTemplateMovie)
 				.onChange(async (value) => {
-					this.plugin.settings.FilenameTemplate = value;
+					this.plugin.settings.FilenameTemplateMovie = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Series filename template')
+			.setDesc('Template used for the filename of Movienotes. Used same template tags as other files.')
+			.addText(text => text
+				.setPlaceholder('')
+				.setValue(this.plugin.settings.FilenameTemplateSeries)
+				.onChange(async (value) => {
+					this.plugin.settings.FilenameTemplateSeries = value;
 					await this.plugin.saveSettings();
 				}));
 	}

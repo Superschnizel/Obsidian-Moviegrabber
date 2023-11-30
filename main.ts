@@ -230,7 +230,10 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 
-		let title = await this.FillTemplate(this.settings.FilenameTemplate, itemData);
+		let titleTemplate = type == 'movie' 
+							? this.settings.FilenameTemplateMovie 
+							: this.settings.FilenameTemplateSeries;
+		let title = await this.FillTemplate(titleTemplate, itemData);
 		title = title == '' ? item.Title : title;
 
 		let path = `${dir}${title.replace(/[/\\?%*:|"<>]/g, '')}.md`
