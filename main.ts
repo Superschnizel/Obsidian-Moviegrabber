@@ -1,14 +1,13 @@
 import { App, Editor, MarkdownView, Modal, Menu, Notice, Plugin, PluginSettingTab, Setting, requestUrl, normalizePath, WorkspaceLeaf, TFile, TAbstractFile } from 'obsidian';
 
-import {MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE, MoviegrabberSettingTab} from "./src/MoviegrabberSettings"
-import {MoviegrabberSearchModal} from "./src/MoviegrabberSearchModal"
-import {MOVIE_DATA_LOWER, MovieData, MovieRating, MovieSearch, MovieSearchItem, Rating, TEST_SEARCH} from "./src/MoviegrabberSearchObject"
+import { MoviegrabberSettings, DEFAULT_SETTINGS, DEFAULT_TEMPLATE, MoviegrabberSettingTab } from "./src/MoviegrabberSettings"
+import { MoviegrabberSearchModal } from "./src/MoviegrabberSearchModal"
+import { MOVIE_DATA_LOWER, MovieData, MovieRating, MovieSearch, MovieSearchItem, Rating, TEST_SEARCH } from "./src/MoviegrabberSearchObject"
 import { MoviegrabberSelectionModal } from 'src/MoviegrabberSelectionModal';
 import { MovieGalleryView, VIEW_TYPE_MOVIE_GALLERY } from 'src/MovieGalleryView';
 import { ConfirmOverwriteModal } from 'src/ConfirmOverwriteModal';
 import { ConfirmCreateNoteModal } from 'src/ConfirmCreateNoteModal';
-import { FolderSuggest } from 'src/interface/FolderSuggester';
-import { FileSuggest } from 'src/interface/FileSuggester';
+import { regexTransform } from 'src/RegexTransform'
 
 const OVERWRITE_DELIMITER = /%%==MOVIEGRABBER_KEEP==%%[\s\S]*/
 const IMDBID_REGEX = /^ev\d{1,8}\/\d{4}(-\d)?$|^(ch|co|ev|nm|tt)\d{1,8}$/
@@ -18,7 +17,7 @@ export default class Moviegrabber extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		
+
 		// Search-Movie command
 		this.addCommand({
 			id: 'search-movie',
@@ -29,8 +28,8 @@ export default class Moviegrabber extends Plugin {
 					n.noticeEl.addClass("notice_error");
 					return;
 				}
-				new MoviegrabberSearchModal(this.app,'movie', (result) => 
-					{this.searchOmdb(result, 'movie');
+				new MoviegrabberSearchModal(this.app, 'movie', (result) => {
+					this.searchOmdb(result, 'movie');
 				}).open();
 			}
 		});
@@ -45,8 +44,8 @@ export default class Moviegrabber extends Plugin {
 					n.noticeEl.addClass("notice_error");
 					return;
 				}
-				new MoviegrabberSearchModal(this.app, 'series',(result) => 
-					{this.searchOmdb(result, 'series');
+				new MoviegrabberSearchModal(this.app, 'series', (result) => {
+					this.searchOmdb(result, 'series');
 				}).open();
 			}
 		});
@@ -68,19 +67,19 @@ export default class Moviegrabber extends Plugin {
 	}
 
 	// search the OMDb and oben selection Modal if some are found
-	async searchOmdb(title : string, type : 'movie' | 'series', depth : number=0) {
+	async searchOmdb(title: string, type: 'movie' | 'series', depth: number = 0) {
 		// cancel recursive retries if depth is too low
 		if (depth >= 4) {
-			this.SendWarningNotice(`Stopping after ${depth +1 } tries.`)
+			this.SendWarningNotice(`Stopping after ${depth + 1} tries.`)
 			return;
 		}
-		
+
 		// check if search string is valid IMDB-id
 		let isImdbId = IMDBID_REGEX.test(title);
 
 		// build request URL
 		var url = new URL("http://www.omdbapi.com");
-		
+
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append(isImdbId ? 'i' : 's', title);
 		url.searchParams.append('type', type);
@@ -90,13 +89,13 @@ export default class Moviegrabber extends Plugin {
 		// fetch data
 		var response;
 		try {
-			response = await requestUrl(url.toString());	
+			response = await requestUrl(url.toString());
 		} catch (error) {
 			this.SendWarningNotice(`Error in request while trying to search ${type}!\nretrying...`);
 			this.searchOmdb(title, type, depth + 1);
 			return;
 		}
-		
+
 		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
 			n.noticeEl.addClass("notice_error");
@@ -113,22 +112,21 @@ export default class Moviegrabber extends Plugin {
 
 		if (isImdbId) {
 			let movie = data as MovieData;
-			new ConfirmCreateNoteModal(this.app, movie, () =>{
+			new ConfirmCreateNoteModal(this.app, movie, () => {
 				this.tryCreateNote(movie, type);
 			}).open();
 			return;
 		}
-		new MoviegrabberSelectionModal(this.app, data as MovieSearch, (result) =>
-			{
-				this.tryCreateNote(result, type);
-			}).open();
+		new MoviegrabberSelectionModal(this.app, data as MovieSearch, (result) => {
+			this.tryCreateNote(result, type);
+		}).open();
 	}
 
 	// get the Movie Data from OMDb
-	async getOmdbData(movie : MovieSearchItem, depth : number=0) : Promise<MovieData | null | undefined> {
+	async getOmdbData(movie: MovieSearchItem, depth: number = 0): Promise<MovieData | null | undefined> {
 		// end retries if recursion too deep.
 		if (depth >= 4) {
-			var n = new Notice(`Could not fetch Movie data: quit after ${depth+1} tries!`);
+			var n = new Notice(`Could not fetch Movie data: quit after ${depth + 1} tries!`);
 			n.noticeEl.addClass("notice_error");
 			return null;
 		}
@@ -149,7 +147,7 @@ export default class Moviegrabber extends Plugin {
 			var n = new Notice(`Error in request while trying to fetch Movie Data!\n...retrying`);
 			return this.getOmdbData(movie, depth + 1); // retry by recursion
 		}
-		
+
 
 		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
@@ -169,7 +167,7 @@ export default class Moviegrabber extends Plugin {
 	}
 
 	// get the trailer embed from youtube.
-	async getTrailerEmbed(title : string, year : number) : Promise<string> {
+	async getTrailerEmbed(title: string, year: number): Promise<string> {
 		var url = new URL("https://www.googleapis.com/youtube/v3/search");
 
 		url.searchParams.append("part", "snippet");
@@ -180,13 +178,13 @@ export default class Moviegrabber extends Plugin {
 
 		var response;
 		try {
-			response = await requestUrl(url.toString());	
+			response = await requestUrl(url.toString());
 		} catch (error) {
 			var n = new Notice(`Error while trying to fetch Youtube trailer embed!`);
 			n.noticeEl.addClass("notice_error");
 			return "Could not find trailer."
 		}
-		
+
 		// something went wrong doing the request.
 		if (response.status != 200) {
 			var n = new Notice(`Http Error! Status: ${response.status}`);
@@ -207,12 +205,12 @@ export default class Moviegrabber extends Plugin {
 		return embed;
 	}
 
-	async tryCreateNote(item : MovieSearchItem | MovieData, type : 'movie' | 'series') {
+	async tryCreateNote(item: MovieSearchItem | MovieData, type: 'movie' | 'series') {
 		// create path and check for directory before posting the request
 		// Transform Search into MovieData
-		var itemData = ('Response' in item ) ? item as MovieData : await this.getOmdbData(item);
-		
-		if (itemData == null || itemData == undefined){
+		var itemData = ('Response' in item) ? item as MovieData : await this.getOmdbData(item);
+
+		if (itemData == null || itemData == undefined) {
 			var n = new Notice(`something went wrong in fetching ${item.Title} data`)
 			n.noticeEl.addClass("notice_error")
 			return;
@@ -220,19 +218,19 @@ export default class Moviegrabber extends Plugin {
 
 
 		var dir = type == 'movie' ? this.settings.MovieDirectory : this.settings.SeriesDirectory;
-		
+
 		dir = this.CleanPath(dir);
 		dir = dir != '' ? `${dir}/` : ''; // this might be unecessary.
-		
+
 		if (!(await this.app.vault.adapter.exists(dir))) {
 			var n = new Notice(`Folder for ${type}: "${dir}" does not exist!`)
 			n.noticeEl.addClass("notice_error")
 			return;
 		}
 
-		let titleTemplate = type == 'movie' 
-							? this.settings.FilenameTemplateMovie 
-							: this.settings.FilenameTemplateSeries;
+		let titleTemplate = type == 'movie'
+			? this.settings.FilenameTemplateMovie
+			: this.settings.FilenameTemplateSeries;
 		let title = await this.FillTemplate(titleTemplate, itemData);
 		title = title == '' ? item.Title : title;
 
@@ -250,8 +248,8 @@ export default class Moviegrabber extends Plugin {
 		this.createNote(itemData, type, path);
 	}
 
-	async createNote(item : MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
-				
+	async createNote(item: MovieData, type: 'movie' | 'series', path: string, tFile: TFile | null = null) {
+
 		new Notice(`Creating Note for: ${item.Title} (${item.Year})`);
 
 		// add and clean up data
@@ -268,7 +266,7 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 		var content = await this.FillTemplate(template, item);
-		
+
 		/* var content = 
 		`---\n`+
 		`type: ${type}\n`+
@@ -308,7 +306,7 @@ export default class Moviegrabber extends Plugin {
 		}
 	}
 
-	async GetTemplate(type : 'movie' | 'series') : Promise<string | null> {
+	async GetTemplate(type: 'movie' | 'series'): Promise<string | null> {
 		if (this.settings.MovieTemplatePath == '') {
 			// no template given, return default
 			return DEFAULT_TEMPLATE;
@@ -329,7 +327,7 @@ export default class Moviegrabber extends Plugin {
 		return text;
 	}
 
-	async FillTemplate(template : string, data : MovieData) : Promise<string> {
+	async FillTemplate(template: string, data: MovieData): Promise<string> {
 		return template.replace(/{{(.*?)}}/g, (match) => {
 			// console.log(match);
 			let inner = match.split(/{{|}}/).filter(Boolean)[0];
@@ -339,6 +337,7 @@ export default class Moviegrabber extends Plugin {
 			let split = inner.split(/(?<!\\)\|/); // split at not escaped "|"
 			const prefix = split.length >= 2 ? split[1].replace(/\\\|/, '|') : '';
 			const suffix = split.length >= 3 ? split[2].replace(/\\\|/, '|') : '';
+			const transformation = split.length >= 4 ? split[3].replace(/\\\|/, '|') : '';
 
 			let result = '';
 			// handle the data being a list.
@@ -347,12 +346,13 @@ export default class Moviegrabber extends Plugin {
 
 			let rawData = data[name];
 
-			let items = rawData instanceof Array 
-						? rawData.map( (elem) : string => {
-							let r = elem as MovieRating;
-							return `${r.Source}: ${r.Value}`;
-						}) 
-						: rawData?.split(/\,\s?/);
+			//  only Ratings are in an array other lists are comma separated
+			let items = rawData instanceof Array
+				? rawData.map((elem): string => {
+					let r = elem as MovieRating;
+					return `${r.Source}: ${r.Value}`;
+				})
+				: rawData?.split(/\,\s?/);
 
 			if (!items) {
 				console.log(`Tag "{{${inner}}}" could not be resolved.`);
@@ -360,27 +360,31 @@ export default class Moviegrabber extends Plugin {
 				return `{{${inner}}}`;
 			}
 
-			result += prefix;
-			result += items[0];	// data
-			result += suffix;
+			items = items.map((elem: string): string => {
+				return regexTransform(elem, transformation);
+			})
 
-			for (let i = 1; i < items.length; i++) {
-				result += ', ';
+
+			for (let i = 0; i < items.length; i++) {
+				if (items[i] == '') {
+					continue;
+				}
+				result += result != '' ? ', ' : '';
 				result += prefix;
 				result += items[i]; // data
 				result += suffix;
 			}
 
-			return result
+			return result;
 		});
 	}
 
-	SendWarningNotice(text:string) {
+	SendWarningNotice(text: string) {
 		var n = new Notice(text);
 		n.noticeEl.addClass("notice_error")
 	}
 
-	async CreateDefaultTemplateFile(){
+	async CreateDefaultTemplateFile() {
 		var content = DEFAULT_TEMPLATE +
 			"\n\n\n%%\n" +
 			"Available tags:\n" +
@@ -411,42 +415,42 @@ export default class Moviegrabber extends Plugin {
 			"{{totalSeasons}}\n" +
 			"{{YoutubeEmbed}}\n" +
 			"%%";
-		
+
 		// create and open file
 		var tFile = await this.app.vault.create('/Moviegrabber-example-template.md', content);
 		this.app.workspace.getLeaf().openFile(tFile);
-		
+
 	}
 
-	CleanPath(path : string) :string {
+	CleanPath(path: string): string {
 		path.replace(/(^[/\s]+)|([/\s]+$)/g, ''); // clean up forbidden symbols
 		path = path != '' ? `${path.replace(/\/$/, "")}` : ''; // trim "/"
 		return path;
 	}
 
 	async activateView() {
-		let { workspace }  = this.app;
-	
+		let { workspace } = this.app;
+
 		let leaf: WorkspaceLeaf;
 		let leaves = workspace.getLeavesOfType(VIEW_TYPE_MOVIE_GALLERY);
-	
+
 		if (leaves.length > 0) {
 			// A leaf with our view already exists, use that
 			leaf = leaves[0];
 			workspace.revealLeaf(leaf);
 			return
-		} 
-		
+		}
+
 		// Our view could not be found in the workspace, create a new leaf
 		// in the right sidebar for it
 		leaf = workspace.getLeaf(false);
 		await leaf.setViewState({ type: VIEW_TYPE_MOVIE_GALLERY, active: true });
 		workspace.revealLeaf(leaf);
-		
-	
+
+
 		// "Reveal" the leaf in case it is in a collapsed sidebar
-		
-	  }
+
+	}
 }
 
 

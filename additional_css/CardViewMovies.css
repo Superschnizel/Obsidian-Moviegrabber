@@ -136,6 +136,7 @@ CardViewMovies table {
     display: flex;
     justify-content: center;
     align-items: center;
+	height: auto;
 }
 
 /* First Column link -- TITLE LINK */
