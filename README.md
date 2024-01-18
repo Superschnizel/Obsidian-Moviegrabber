@@ -49,9 +49,24 @@ To define how the data will be saved in your notes you can define a template. Th
 {{totalSeasons}}
 {{YoutubeEmbed}}
 ```
-Additionally you can define a pre- and suffix to be applied to the data. this is done by using `{{tag|prefix|suffix}}`. *(if you want to use the "|" character, it can be escaped using "\\|")*.
+### Pre- and Suffix
+
+You can define a pre- and suffix to be applied to the data. this is done by using `{{tag|prefix|suffix}}`. *(if you want to use the "|" character, it can be escaped using "\\|")*.
 
 Example: ``{{Director|"[[|]]"}}`` will create an internal link of the form `"[[Director]]"`
+
+### Regex Transformation
+
+Additionally you can also give a *regex transform* to transform the data to your liking by using `{{tag|prefix|suffix|regexTransform}}`. 
+
+Inside a regex transformation every regular expression given inside `<$ $>` delimiters will be replaced by the matching string from the input. This allows you to bring the data into the form you need it.
+
+Examples:
+- `{{Actors|"[[|]]"|<$\w+$$>, <$^\w+$>\|@<$^\w+$> <$\w+$$>}}`. This regex transformation will transform the "Actors" data in the form of `Firstname Lastname` into a link in the form of `"[[Lastname, Firstname|@Firstname Lastname]]"` (see issue #21).
+- `{{Ratings|"|"|<$Rotten Tomatoes\: .*$>}}`. This regex transformation will result in only the Rotten Tomatoes rating to be shown.
+
+When a regex transformation results in an empty string pre- and suffix will not be applied.
+
 
 You can generate an example template in the plugin settings. If no template is given, this default template is used.
 
