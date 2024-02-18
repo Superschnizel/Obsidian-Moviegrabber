@@ -1,9 +1,9 @@
 {
 	"id": "moviegrabber",
 	"name": "Moviegrabber",
-	"version": "1.1.14",
+	"version": "1.1.15",
 	"minAppVersion": "0.15.0",
-	"description": "Grab movie data from public APIs and transform it into notes that can be used with dataview and properties",
+	"description": "Grab movie data from public APIs and transform it into notes with a powerful templating engine.",
 	"author": "Superschnizel",
 	"authorUrl": "https://github.com/Superschnizel",
 	"isDesktopOnly": false

@@ -80,11 +80,18 @@ export default class Moviegrabber extends Plugin {
 		// build request URL
 		var url = new URL("http://www.omdbapi.com");
 
+		// add year search
+		let year = title.match(/\(\d{4}\)/g);
+		title = title.replace(/\(\d{4}\)/g, '').trim();
+
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append(isImdbId ? 'i' : 's', title);
+		if (year) {
+			url.searchParams.append('y', year[0].replace(/[\(\)]/g, ''));
+		}
 		url.searchParams.append('type', type);
 
-		// console.log(`requesting: ${url}`);
+		console.log(`requesting: ${url}`);
 
 		// fetch data
 		var response;

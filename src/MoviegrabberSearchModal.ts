@@ -16,6 +16,8 @@ export class MoviegrabberSearchModal extends Modal {
     const { contentEl } = this;
 
     contentEl.createEl("h1", { text: `Search ${this.searchType} by title` });
+	let label = contentEl.createDiv({cls : "search_text_label_box"}).createSpan({cls : "search_text_label"});
+	label.innerText = "To add a year to the search put it in parntheses: (2024).\nYou can also directly enter an ImdbID (e.g. tt0062622).";
     // contentEl.createEl("input", {type: "text", cls: "search_text"})
     var text = new TextComponent(contentEl.createDiv({cls : "search_text_box"}))
       .onChange((value) => { 
