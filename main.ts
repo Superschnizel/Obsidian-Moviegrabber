@@ -251,6 +251,12 @@ export default class Moviegrabber extends Plugin {
 	}
 
 	async createNote(item : MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
+		if (this.settings.enablePosterImageSave && item.Poster && item.Poster !== "N/A") {
+			// Construct the image name in a similar fashion to the provided example
+			const imageName = `${item.Title}_${item.Year}`.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '.jpg';
+			const posterDirectory = this.settings.posterImagePath;
+			item.PosterLocal = await this.downloadAndSavePoster(item.Poster, posterDirectory, imageName);
+		}
 				
 		new Notice(`Creating Note for: ${item.Title} (${item.Year})`);
 
@@ -305,6 +311,24 @@ export default class Moviegrabber extends Plugin {
 
 		if (this.settings.SwitchToCreatedNote) {
 			this.app.workspace.getLeaf().openFile(tFile);
+		}
+	}
+
+	async downloadAndSavePoster(imageUrl: string, directory: string, imageName: string): Promise<string> {
+		if (!directory) {
+			console.error("Poster image directory is not specified.");
+			return "";
+		}
+	
+		const filePath = normalizePath(`${directory}/${imageName}`);
+		try {
+			const response = await requestUrl({ url: imageUrl, method: "GET" });
+			const imageData = response.arrayBuffer;
+			await this.app.vault.adapter.writeBinary(filePath, imageData);
+			return filePath;
+		} catch (error) {
+			console.error("Error downloading or saving poster image:", error);
+			return "";
 		}
 	}
 
