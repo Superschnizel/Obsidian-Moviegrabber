@@ -39,8 +39,8 @@ export default class Moviegrabber extends Plugin {
 			id: 'search-series',
 			name: 'Search series',
 			callback: () => {
-				if (this.settings.OMDb_API_Key == '' || this.settings.YouTube_API_Key == '') {
-					var n = new Notice("missing one or more API keys!")
+				if (this.settings.OMDb_API_Key == '') {
+					var n = new Notice("missing OMDb API key!")
 					n.noticeEl.addClass("notice_error");
 					return;
 				}
