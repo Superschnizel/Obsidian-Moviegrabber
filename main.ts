@@ -252,8 +252,12 @@ export default class Moviegrabber extends Plugin {
 
 	async createNote(item : MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
 		if (this.settings.enablePosterImageSave && item.Poster && item.Poster !== "N/A") {
-			// Construct the image name in a similar fashion to the provided example
-			const imageName = `${item.Title}_${item.Year}`.replace(/[^a-z0-9]+/gi, '_').toLowerCase() + '.jpg';
+			const titleTemplate = type == 'movie' 
+								? this.settings.FilenameTemplateMovie 
+								: this.settings.FilenameTemplateSeries;
+			let noteTitle = await this.FillTemplate(titleTemplate, item);
+			noteTitle = noteTitle == '' ? item.Title : noteTitle;
+			const imageName = `${noteTitle.replace(/[/\\?%*:|"<>]/g, '').toLowerCase()}.jpg`;
 			const posterDirectory = this.settings.posterImagePath;
 			item.PosterLocal = await this.downloadAndSavePoster(item.Poster, posterDirectory, imageName);
 		}
