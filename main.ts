@@ -248,8 +248,6 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 
-		this.createNote(itemData, type, path);
-
 		if (this.settings.enablePosterImageSave && itemData.Poster !== null && itemData.Poster !== "N/A") {
 			const imageName = `${cleanedTitle}.jpg`;
 			const posterDirectory = this.settings.posterImagePath;
@@ -266,6 +264,8 @@ export default class Moviegrabber extends Plugin {
 			});
 		
 		}
+
+		this.createNote(itemData, type, path);
 	}
 
 	async createNote(item : MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {				
