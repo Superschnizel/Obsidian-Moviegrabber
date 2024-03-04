@@ -236,7 +236,8 @@ export default class Moviegrabber extends Plugin {
 		let title = await this.FillTemplate(titleTemplate, itemData);
 		title = title == '' ? item.Title : title;
 
-		let path = `${dir}${title.replace(/[/\\?%*:|"<>]/g, '')}.md`
+		const cleanedTitle = title.replace(/[/\\?%*:|"<>]/g, '') 
+		let path = `${dir}${cleanedTitle}.md`
 		let file = this.app.vault.getAbstractFileByPath(path);
 
 		// console.log(`${file}, path: ${path}`);
@@ -247,11 +248,27 @@ export default class Moviegrabber extends Plugin {
 			return;
 		}
 
+		if (this.settings.enablePosterImageSave && itemData.Poster !== null && itemData.Poster !== "N/A") {
+			const imageName = `${cleanedTitle}.jpg`;
+			const posterDirectory = this.settings.posterImagePath;
+			this.downloadAndSavePoster(item.Poster, posterDirectory, imageName)
+			.then(posterLocalPath => {
+				itemData.PosterLocal = posterLocalPath;
+				new Notice(`Saved poster for: ${itemData.Title} (${itemData.Year})`);
+			})
+			.catch(error => {
+				console.error("Failed to download and save the poster:", error);
+				new Notice(`Failed to download and save the movie poster for: ${itemData.Title} (${itemData.Year})`);
+				n.noticeEl.addClass("notice_error");
+				itemData.PosterLocal = null;
+			});
+		
+		}
+
 		this.createNote(itemData, type, path);
 	}
 
-	async createNote(item : MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {
-				
+	async createNote(item : MovieData, type : 'movie' | 'series', path : string, tFile : TFile | null=null) {				
 		new Notice(`Creating Note for: ${item.Title} (${item.Year})`);
 
 		// add and clean up data
@@ -305,6 +322,24 @@ export default class Moviegrabber extends Plugin {
 
 		if (this.settings.SwitchToCreatedNote) {
 			this.app.workspace.getLeaf().openFile(tFile);
+		}
+	}
+
+	async downloadAndSavePoster(imageUrl: string, directory: string, imageName: string): Promise<string> {
+		if (!directory) {
+			console.error("Poster image directory is not specified.");
+			throw new Error("Poster image directory is not specified.");
+		}
+	
+		const filePath = normalizePath(`${directory}/${imageName}`);
+		try {
+			const response = await requestUrl({ url: imageUrl, method: "GET" });
+			const imageData = response.arrayBuffer;
+			await this.app.vault.adapter.writeBinary(filePath, imageData);
+			return filePath;
+		} catch (error) {
+			console.error("Error downloading or saving poster image:", error);
+			throw error;
 		}
 	}
 
