@@ -254,7 +254,6 @@ export default class Moviegrabber extends Plugin {
 			const imageName = `${cleanedTitle}.jpg`;
 			const posterDirectory = this.settings.posterImagePath;
 			this.downloadAndSavePoster(item.Poster, posterDirectory, imageName)
-			this.downloadAndSavePoster(item.Poster, posterDirectory, imageName)
 			.then(posterLocalPath => {
 				itemData.PosterLocal = posterLocalPath;
 				new Notice(`Saved poster for: ${itemData.Title} (${itemData.Year})`);
