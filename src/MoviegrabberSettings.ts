@@ -16,6 +16,9 @@ export interface MoviegrabberSettings {
 	PlotLength: string;
 	FilenameTemplateMovie: string;
 	FilenameTemplateSeries: string;
+
+	enablePosterImageSave: boolean;
+	posterImagePath: string;
 }
 
 export const DEFAULT_SETTINGS: MoviegrabberSettings = {
@@ -28,7 +31,9 @@ export const DEFAULT_SETTINGS: MoviegrabberSettings = {
 	SeriesTemplatePath: '',
 	PlotLength: 'short',
 	FilenameTemplateMovie: '{{Title}}',
-	FilenameTemplateSeries: '{{Title}}'
+	FilenameTemplateSeries: '{{Title}}',
+	enablePosterImageSave: false,
+	posterImagePath: '',
 }
 
 export const DEFAULT_TEMPLATE: string = "---\n"+
@@ -190,5 +195,29 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 					this.plugin.settings.FilenameTemplateSeries = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Enable Poster Image Save')
+			.setDesc('Toggle to enable or disable saving movie poster images in notes.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.enablePosterImageSave)
+				.onChange(async value => {
+					this.plugin.settings.enablePosterImageSave = value;
+					await this.plugin.saveSettings();
+				}),
+			);
+
+		new Setting(containerEl)
+			.setName('Poster Image Path')
+			.setDesc('Specify the path where poster images should be saved.')
+			.addSearch(cb => {
+				new FolderSuggest(cb.inputEl, this.plugin.app);
+				cb.setPlaceholder("Enter the path (e.g., Movies/Posters)")
+					.setValue(this.plugin.settings.posterImagePath)
+					.onChange(async value => {
+						this.plugin.settings.posterImagePath = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
 	}
 }
