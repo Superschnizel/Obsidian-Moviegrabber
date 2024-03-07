@@ -36,22 +36,22 @@ export const DEFAULT_SETTINGS: MoviegrabberSettings = {
 	posterImagePath: '',
 }
 
-export const DEFAULT_TEMPLATE: string = "---\n"+
-	"type: {{Type}}\n"+
-	`country: {{Country}}\n`+
-	`title: {{Title}}\n`+
-	`year: {{Year}}\n`+
-	`director: {{Director}}\n`+
-	`actors: [{{Actors}}]\n`+
-	`genre: [{{Genre}}]\n`+
-	`length: {{Runtime}}\n`+
-	`seen:\n`+
-	`rating: \n`+
-	`found_at: \n`+
+export const DEFAULT_TEMPLATE: string = "---\n" +
+	"type: {{Type}}\n" +
+	`country: {{Country}}\n` +
+	`title: {{Title}}\n` +
+	`year: {{Year}}\n` +
+	`director: {{Director}}\n` +
+	`actors: [{{Actors}}]\n` +
+	`genre: [{{Genre}}]\n` +
+	`length: {{Runtime}}\n` +
+	`seen:\n` +
+	`rating: \n` +
+	`found_at: \n` +
 	`trailer_embed: {{YoutubeEmbed}}\n` +
-	`poster: "{{Poster}}"\n`+
-	`availability:\n`+
-	`---\n`+
+	`poster: "{{Poster}}"\n` +
+	`availability:\n` +
+	`---\n` +
 	`{{Plot}}`;
 
 export class MoviegrabberSettingTab extends PluginSettingTab {
@@ -63,7 +63,7 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
@@ -71,28 +71,28 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 			.setName('Movie folder')
 			.setDesc('Folder in which to save the generated notes for series')
 			.addSearch((cb) => {
-                new FolderSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.MovieDirectory)
-                    .onChange(async (newFolder) => {
-                        this.plugin.settings.MovieDirectory = newFolder;
-                        await this.plugin.saveSettings();
-                    });
-				});
-			
-		
+				new FolderSuggest(cb.inputEl, this.plugin.app);
+				cb.setPlaceholder("Example: folder1/folder2")
+					.setValue(this.plugin.settings.MovieDirectory)
+					.onChange(async (newFolder) => {
+						this.plugin.settings.MovieDirectory = newFolder;
+						await this.plugin.saveSettings();
+					});
+			});
+
+
 		new Setting(containerEl)
 			.setName('Series folder')
 			.setDesc('Folder in which to save the generated notes for series')
 			.addSearch((cb) => {
-                new FolderSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.SeriesDirectory)
-                    .onChange(async (newFolder) => {
-                        this.plugin.settings.SeriesDirectory = newFolder;
-                        await this.plugin.saveSettings();
-                    });
-				});
+				new FolderSuggest(cb.inputEl, this.plugin.app);
+				cb.setPlaceholder("Example: folder1/folder2")
+					.setValue(this.plugin.settings.SeriesDirectory)
+					.onChange(async (newFolder) => {
+						this.plugin.settings.SeriesDirectory = newFolder;
+						await this.plugin.saveSettings();
+					});
+			});
 
 		new Setting(containerEl)
 			.setName('OMDb API key')
@@ -104,7 +104,7 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 					this.plugin.settings.OMDb_API_Key = value;
 					await this.plugin.saveSettings();
 				}));
-		
+
 		new Setting(containerEl)
 			.setName('Youtube API key')
 			.setDesc('Your API key for Youtube (optional)')
@@ -115,7 +115,7 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 					this.plugin.settings.YouTube_API_Key = value;
 					await this.plugin.saveSettings();
 				}));
-		
+
 		new Setting(containerEl)
 			.setName('Plot length')
 			.setDesc('choose the plot length option for Omdb.')
@@ -137,34 +137,61 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 					this.plugin.settings.SwitchToCreatedNote = value;
 					await this.plugin.saveSettings();
 				}));
-		
-		containerEl.createEl('h1', { text : "Templates"})
+
+		new Setting(containerEl)
+			.setName('Enable poster image saving')
+			.setDesc('Toggle to enable or disable saving movie poster images as files.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.enablePosterImageSave)
+				.onChange(async value => {
+					this.plugin.settings.enablePosterImageSave = value;
+					await this.plugin.saveSettings();
+					this.display();
+				}),
+			);
+
+		if (this.plugin.settings.enablePosterImageSave) {
+			new Setting(containerEl)
+			.setName('Poster image directory')
+			.setDesc('Specify the path where poster images should be saved.')
+			.addSearch(cb => {
+				new FolderSuggest(cb.inputEl, this.plugin.app);
+				cb.setPlaceholder("Enter the path (e.g., Movies/Posters)")
+					.setValue(this.plugin.settings.posterImagePath)
+					.onChange(async value => {
+						this.plugin.settings.posterImagePath = value.trim();
+						await this.plugin.saveSettings();
+					});
+			});
+		}
+
+		containerEl.createEl('h1', { text: "Templates" })
 		new Setting(containerEl)
 			.setName('Movie template file path')
 			.setDesc('Path to the template file that is used to create notes for movies')
 			.addSearch((cb) => {
-                new FileSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.MovieTemplatePath)
-                    .onChange(async (newFile) => {
-                        this.plugin.settings.MovieTemplatePath = newFile;
-                        await this.plugin.saveSettings();
-                    });
-				});
+				new FileSuggest(cb.inputEl, this.plugin.app);
+				cb.setPlaceholder("Example: folder1/folder2")
+					.setValue(this.plugin.settings.MovieTemplatePath)
+					.onChange(async (newFile) => {
+						this.plugin.settings.MovieTemplatePath = newFile;
+						await this.plugin.saveSettings();
+					});
+			});
 
 		new Setting(containerEl)
 			.setName('Series template file path')
 			.setDesc('Path to the template file that is used to create notes for series')
 			.addSearch((cb) => {
-                new FileSuggest(cb.inputEl, this.plugin.app);
-                cb.setPlaceholder("Example: folder1/folder2")
-                    .setValue(this.plugin.settings.SeriesTemplatePath)
-                    .onChange(async (newFile) => {
-                        this.plugin.settings.SeriesTemplatePath = newFile;
-                        await this.plugin.saveSettings();
-                    });
-				});
-		
+				new FileSuggest(cb.inputEl, this.plugin.app);
+				cb.setPlaceholder("Example: folder1/folder2")
+					.setValue(this.plugin.settings.SeriesTemplatePath)
+					.onChange(async (newFile) => {
+						this.plugin.settings.SeriesTemplatePath = newFile;
+						await this.plugin.saveSettings();
+					});
+			});
+
 		new Setting(containerEl)
 			.setName('Create example template file')
 			.setDesc('Creates an example template file to expand and use.\nThe file is called `/Moviegrabber-example-template`')
@@ -173,7 +200,7 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 				.onClick((event) => {
 					this.plugin.CreateDefaultTemplateFile();
 				}));
-		
+
 		new Setting(containerEl)
 			.setName('Movie filename template')
 			.setDesc('Template used for the filename of Movienotes. Used same template tags as other files.')
@@ -196,28 +223,5 @@ export class MoviegrabberSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
-			.setName('Enable Poster Image Save')
-			.setDesc('Toggle to enable or disable saving movie poster images in notes.')
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.enablePosterImageSave)
-				.onChange(async value => {
-					this.plugin.settings.enablePosterImageSave = value;
-					await this.plugin.saveSettings();
-				}),
-			);
-
-		new Setting(containerEl)
-			.setName('Poster Image Path')
-			.setDesc('Specify the path where poster images should be saved.')
-			.addSearch(cb => {
-				new FolderSuggest(cb.inputEl, this.plugin.app);
-				cb.setPlaceholder("Enter the path (e.g., Movies/Posters)")
-					.setValue(this.plugin.settings.posterImagePath)
-					.onChange(async value => {
-						this.plugin.settings.posterImagePath = value.trim();
-						await this.plugin.saveSettings();
-					});
-			});
 	}
 }

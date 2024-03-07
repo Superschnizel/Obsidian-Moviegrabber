@@ -248,32 +248,16 @@ export default class Moviegrabber extends Plugin {
 		// console.log(`${file}, path: ${path}`);
 		if (file != null && file instanceof TFile) {
 			new ConfirmOverwriteModal(this.app, item, () => {
-				this.createNote(itemData!, type, path, file as TFile);
+				this.createNote(itemData!, type, path, cleanedTitle, file as TFile);
 			}).open();
 			return;
 		}
 
-		if (this.settings.enablePosterImageSave && itemData.Poster !== null && itemData.Poster !== "N/A") {
-			const imageName = `${cleanedTitle}.jpg`;
-			const posterDirectory = this.settings.posterImagePath;
-			this.downloadAndSavePoster(item.Poster, posterDirectory, imageName)
-			.then(posterLocalPath => {
-				itemData!.PosterLocal = posterLocalPath;
-				new Notice(`Saved poster for: ${itemData!.Title} (${itemData!.Year})`);
-			})
-			.catch(error => {
-				console.error("Failed to download and save the poster:", error);
-				new Notice(`Failed to download and save the movie poster for: ${itemData!.Title} (${itemData!.Year})`);
-				n.noticeEl.addClass("notice_error");
-				itemData!.PosterLocal = 'null';
-			});
-		
-		}
 
-		this.createNote(itemData, type, path);
+		this.createNote(itemData, type, path, cleanedTitle);
 	}
 
-	async createNote(item: MovieData, type: 'movie' | 'series', path: string, tFile: TFile | null = null) {
+	async createNote(item: MovieData, type: 'movie' | 'series', path: string, filename: string, tFile: TFile | null = null) {
 		new Notice(`Creating Note for: ${item.Title} (${item.Year})`);
 
 		// add and clean up data
@@ -281,6 +265,23 @@ export default class Moviegrabber extends Plugin {
 		item.Runtime = item.Runtime ? item.Runtime.split(" ")[0] : '';
 		if (this.settings.YouTube_API_Key != '') {
 			item.YoutubeEmbed = await this.getTrailerEmbed(item.Title, item.Year);
+		}
+
+		if (this.settings.enablePosterImageSave && item.Poster !== null && item.Poster !== "N/A") {
+			const imageName = `${filename}.jpg`;
+			const posterDirectory = this.settings.posterImagePath;
+			await this.downloadAndSavePoster(item.Poster, posterDirectory, imageName)
+			.then(posterLocalPath => {
+				item.PosterLocal = imageName; // i think full path is usualy not needed.
+				new Notice(`Saved poster for: ${item!.Title} (${item!.Year})`);
+			})
+			.catch(error => {
+				console.error("Failed to download and save the poster:", error);
+				let n = new Notice(`Failed to download and save the movie poster for: ${item!.Title} (${item!.Year})`);
+				n.noticeEl.addClass("notice_error");
+				item!.PosterLocal = 'null';
+			});
+		
 		}
 
 		// get and fill template
@@ -445,6 +446,7 @@ export default class Moviegrabber extends Plugin {
 			"{{Country}}\n" +
 			"{{Awards}}\n" +
 			"{{Poster}}\n" +
+			"{{PosterLocal}}" +
 			"{{Ratings}}\n" +
 			"{{Metascore}}\n" +
 			"{{imdbRating}}\n" +
