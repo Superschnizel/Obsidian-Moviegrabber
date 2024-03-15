@@ -6,5 +6,6 @@
 	"description": "Grab movie data from public APIs and transform it into notes with a powerful templating engine.",
 	"author": "Superschnizel",
 	"authorUrl": "https://github.com/Superschnizel",
+	"fundingUrl": "https://ko-fi.com/superschnizel",
 	"isDesktopOnly": false
 }
