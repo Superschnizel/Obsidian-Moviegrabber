@@ -320,7 +320,10 @@ export default class Moviegrabber extends Plugin {
 			// find delimiter string if it exists and keep whatever is below.
 			let toKeep = OVERWRITE_DELIMITER.exec(oldContent);
 
-			this.app.vault.modify(tFile, content + '\n' + (toKeep != null ? toKeep : ''));
+			// make sure there is only one delimiter
+			let newContent = toKeep != null ? content.replace(OVERWRITE_DELIMITER, '\n') + toKeep : content;
+
+			this.app.vault.modify(tFile, newContent);
 
 			// trigger "create" Event to assure compatibility with other plugins, like templater
 			this.app.vault.trigger("create", tFile);

@@ -42,7 +42,7 @@ export const DEFAULT_TEMPLATE: string = "---\n" +
 	`title: {{Title}}\n` +
 	`year: {{Year}}\n` +
 	`director: {{Director}}\n` +
-	`actors: [{{Actors}}]\n` +
+	`actors: [{{Actors|"[[|]]"|<$\w+$$>, <$^\w+$>\|@<$^\w+$> <$\w+$$>}}]\n` +
 	`genre: [{{Genre}}]\n` +
 	`length: {{Runtime}}\n` +
 	`seen:\n` +
