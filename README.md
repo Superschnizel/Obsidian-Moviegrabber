@@ -75,6 +75,14 @@ When a regex transformation results in an empty string pre- and suffix will not 
 
 You can generate an example template in the plugin settings. If no template is given, this default template is used.
 
+### String Functions
+
+Finally you can also use [javascript functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) to transform the input by giving the function name as the 4th argument. This can for example be used to transform the data into all lowercase:
+
+```
+{{Genre||||toLowerCase}}
+```
+
 ## Regenerating notes
 
 When trying to create a note for a movie that already exists you will be asked if you want to overwrite the existing note. If you want to keep something from the old note in the newly generated one you can make use of the delimiter string:
