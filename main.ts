@@ -241,7 +241,7 @@ export default class Moviegrabber extends Plugin {
 		let filename = await this.FillTemplate(filenameTemplate, itemData);
 		filename = filename == '' ? item.Title : filename;
 
-		const cleanedTitle = filename.replace(/[/\\?%*:|"<>]/g, '') 
+		const cleanedTitle = filename.replace(/[/\\?%*:|"<>]/g, '')
 		let path = `${dir}${cleanedTitle}.md`
 		let file = this.app.vault.getAbstractFileByPath(path);
 
@@ -271,17 +271,17 @@ export default class Moviegrabber extends Plugin {
 			const imageName = `${filename}.jpg`;
 			const posterDirectory = this.settings.posterImagePath;
 			await this.downloadAndSavePoster(item.Poster, posterDirectory, imageName)
-			.then(posterLocalPath => {
-				item.PosterLocal = imageName; // i think full path is usualy not needed.
-				new Notice(`Saved poster for: ${item!.Title} (${item!.Year})`);
-			})
-			.catch(error => {
-				console.error("Failed to download and save the poster:", error);
-				let n = new Notice(`Failed to download and save the movie poster for: ${item!.Title} (${item!.Year})`);
-				n.noticeEl.addClass("notice_error");
-				item!.PosterLocal = 'null';
-			});
-		
+				.then(posterLocalPath => {
+					item.PosterLocal = imageName; // i think full path is usualy not needed.
+					new Notice(`Saved poster for: ${item!.Title} (${item!.Year})`);
+				})
+				.catch(error => {
+					console.error("Failed to download and save the poster:", error);
+					let n = new Notice(`Failed to download and save the movie poster for: ${item!.Title} (${item!.Year})`);
+					n.noticeEl.addClass("notice_error");
+					item!.PosterLocal = 'null';
+				});
+
 		}
 
 		// get and fill template
@@ -340,7 +340,7 @@ export default class Moviegrabber extends Plugin {
 			console.error("Poster image directory is not specified.");
 			throw new Error("Poster image directory is not specified.");
 		}
-	
+
 		const filePath = normalizePath(`${directory}/${imageName}`);
 		try {
 			const response = await requestUrl({ url: imageUrl, method: "GET" });
@@ -353,7 +353,7 @@ export default class Moviegrabber extends Plugin {
 		}
 	}
 
-	async GetTemplate(type : 'movie' | 'series') : Promise<string | null> {
+	async GetTemplate(type: 'movie' | 'series'): Promise<string | null> {
 		if (this.settings.MovieTemplatePath == '') {
 			// no template given, return default
 			return DEFAULT_TEMPLATE;
@@ -385,6 +385,7 @@ export default class Moviegrabber extends Plugin {
 			const prefix = split.length >= 2 ? split[1].replace(/\\\|/, '|') : '';
 			const suffix = split.length >= 3 ? split[2].replace(/\\\|/, '|') : '';
 			const transformation = split.length >= 4 ? split[3].replace(/\\\|/, '|') : '';
+			const stringFunction = split.length >= 5 ? split[4].replace(/\\\|/, '|') : '';
 
 			let result = '';
 			// handle the data being a list.
@@ -410,6 +411,19 @@ export default class Moviegrabber extends Plugin {
 			items = items.map((elem: string): string => {
 				return regexTransform(elem, transformation);
 			})
+
+			if (stringFunction != '') {
+				items = items.map((elem: string): string => {
+					try {
+						// @ts-ignore
+						let str = elem[stringFunction]();
+						return str;
+					} catch (error) {
+						let n = new Notice(`${stringFunction} is not a valid string Function!`)
+					}
+					return elem;
+				})
+			}
 
 
 			for (let i = 0; i < items.length; i++) {
