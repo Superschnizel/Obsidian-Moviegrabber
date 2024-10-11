@@ -12,6 +12,8 @@ import { regexTransform } from 'src/RegexTransform'
 const OVERWRITE_DELIMITER = /%%==MOVIEGRABBER_KEEP==%%[\s\S]*/
 const IMDBID_REGEX = /^ev\d{1,8}\/\d{4}(-\d)?$|^(ch|co|ev|nm|tt)\d{1,8}$/
 
+const EXLUDE_COMMA_SPLIT = ["imdbVotes", "BoxOffice"];
+
 export default class Moviegrabber extends Plugin {
 	settings: MoviegrabberSettings;
 
@@ -80,7 +82,7 @@ export default class Moviegrabber extends Plugin {
 		// build request URL
 		var url = new URL("http://www.omdbapi.com");
 
-		// add year search
+		// add year to search
 		let year = title.match(/\(\d{4}\)/g);
 		title = title.replace(/\(\d{4}\)/g, '').trim();
 
@@ -214,7 +216,7 @@ export default class Moviegrabber extends Plugin {
 
 	async tryCreateNote(item: MovieSearchItem | MovieData, type: 'movie' | 'series') {
 		// create path and check for directory before posting the request
-		// Transform Search into MovieData
+		// Transform Search into MovieData if it is not already MovieData
 		var itemData = ('Response' in item) ? item as MovieData : await this.getOmdbData(item);
 
 		if (itemData == null || itemData == undefined) {
@@ -261,12 +263,16 @@ export default class Moviegrabber extends Plugin {
 		new Notice(`Creating Note for: ${item.Title} (${item.Year})`);
 
 		// add and clean up data
-		item.Title = item.Title.replace(/[/\\?%*:|"<>]/g, ''); // clean Movie Title to avoid frontmatter issues
+		// clean Movie Title to avoid frontmatter issues
+		item.Title = item.Title.replace(/[/\\?%*:|"<>]/g, '');
 		item.Runtime = item.Runtime ? item.Runtime.split(" ")[0] : '';
+
+		// add youtube trailer if API key is given
 		if (this.settings.YouTube_API_Key != '') {
 			item.YoutubeEmbed = await this.getTrailerEmbed(item.Title, item.Year);
 		}
 
+		// if poster saving is enabled, save images
 		if (this.settings.enablePosterImageSave && item.Poster !== null && item.Poster !== "N/A") {
 			const imageName = `${filename}.jpg`;
 			const posterDirectory = this.settings.posterImagePath;
@@ -285,7 +291,6 @@ export default class Moviegrabber extends Plugin {
 		}
 
 		// get and fill template
-
 		var template = await this.GetTemplate(type)
 		if (template == null) {
 			return;
@@ -400,7 +405,8 @@ export default class Moviegrabber extends Plugin {
 					let r = elem as MovieRating;
 					return `${r.Source}: ${r.Value}`;
 				})
-				: rawData?.split(/\,\s?/);
+				: (EXLUDE_COMMA_SPLIT.contains(name) ? [rawData] :
+				rawData?.split(/\,\s?/));
 
 			if (!items) {
 				console.log(`Tag "{{${inner}}}" could not be resolved.`);
@@ -465,6 +471,7 @@ export default class Moviegrabber extends Plugin {
 			"{{Poster}}\n" +
 			"{{PosterLocal}}" +
 			"{{Ratings}}\n" +
+			"{{Released}}\n" +
 			"{{Metascore}}\n" +
 			"{{imdbRating}}\n" +
 			"{{imdbVotes}}\n" +
