@@ -52,6 +52,11 @@ To define how the data will be saved in your notes you can define a template. Th
 {{totalSeasons}}
 {{YoutubeEmbed}}
 ```
+
+> **Note:**
+> The data for some tags come as a list (e.g. `{{Actors}}`). To make these into a valid frontmatter list you can sorround them with square brakets:
+> `[{{Actors}}]`
+
 ### Pre- and Suffix
 
 You can define a pre- and suffix to be applied to the data. this is done by using `{{tag|prefix|suffix}}`. *(if you want to use the "|" character, it can be escaped using "\\|")*.
