@@ -41,7 +41,18 @@ export interface MovieData{
     Website: string,
     totalSeasons: number,
     Response: boolean,
-    YoutubeEmbed: string
+    YoutubeEmbed: string,
+    tomatoURL: string,
+    tomatoMeter: number,
+    tomatoImage: string,
+    tomatoRating: number,
+    tomatoReviews: number,
+    tomatoFresh: number,
+    tomatoRotten: number,
+    tomatoConsensus: string,
+    tomatoUserMeter: number,
+    tomatoUserRating: number,
+    tomatoUserReviews: number
   }
 
 export interface MovieRating{
@@ -57,40 +68,55 @@ export class Rating implements MovieRating {
     }
 }
 
-interface MovieDataLowercase {
+export interface MovieDataLowercase extends LowerCase<MovieData> {
     [key:string]: string
 }
 
+// given a lowercase key, return the mixed case key
+type LowerCase<T> = {  [Property in keyof T as `${Lowercase<string & Property>}`]: Property };
+
 // this is used to make tags case insensitive
+// should ensure that lowercase version of any new property of MovieData gets created without manual effort
 export const MOVIE_DATA_LOWER : MovieDataLowercase = {
-    "title" : "Title",
-    "year" : "Year",
-    "rated" : "Rated",
-    "runtime" : "Runtime",
-    "genre" : "Genre",
-    "director" : "Director",
-    "writer" : "Writer",
-    "actors" : "Actors",
-    "plot" : "Plot",
-    "language" : "Language",
-    "country" : "Country",
-    "awards" : "Awards",
-    "poster" : "Poster",
-    "posterlocal": "PosterLocal",
-    "ratings" : "Ratings",
-	"released": "Released",
-    "metascore" : "Metascore",
-    "imdbrating" : "imdbRating",
-    "imdbvotes" : "imdbVotes",
-    "imdbid" : "imdbID",
-    "type" : "Type",
-    "dvd" : "DVD",
-    "boxoffice" : "BoxOffice",
-    "production" : "Production",
-    "website" : "Website",
-    "totalseasons" : "totalSeasons",
-    "response" : "Response",
-    "youtubeembed" : "YoutubeEmbed", 
+    title: "Title",
+    year: "Year",
+    rated: "Rated",
+    runtime: "Runtime",
+    genre: "Genre",
+    director: "Director",
+    writer: "Writer",
+    actors: "Actors",
+    plot: "Plot",
+    language: "Language",
+    country: "Country",
+    awards: "Awards",
+    poster: "Poster",
+    posterlocal: "PosterLocal",
+    ratings: "Ratings",
+    released: "Released",
+    metascore: "Metascore",
+    imdbrating: "imdbRating",
+    imdbvotes: "imdbVotes",
+    imdbid: "imdbID",
+    type: "Type",
+    dvd: "DVD",
+    boxoffice: "BoxOffice",
+    production: "Production",
+    website: "Website",
+    totalseasons: "totalSeasons",
+    response: "Response",
+    youtubeembed: "YoutubeEmbed",
+    tomatourl: "tomatoURL",
+    tomatometer: "tomatoMeter",
+    tomatoimage: "tomatoImage",
+    tomatorating: "tomatoRating",
+    tomatoreviews: "tomatoReviews",
+    tomatofresh: "tomatoFresh",
+    tomatorotten: "tomatoRotten",
+    tomatoconsensus: "tomatoConsensus",
+    tomatousermeter: "tomatoUserMeter",
+    tomatouserrating: "tomatoUserRating",
+    tomatouserreviews: "tomatoUserReviews"
 }
 
 export const TEST_SEARCH : MovieSearch = {

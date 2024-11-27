@@ -92,6 +92,7 @@ export default class Moviegrabber extends Plugin {
 			url.searchParams.append('y', year[0].replace(/[\(\)]/g, ''));
 		}
 		url.searchParams.append('type', type);
+		url.searchParams.append('tomatoes', this.settings.RottenTomatoes.toString());
 
 		console.log(`requesting: ${url}`);
 
@@ -146,6 +147,7 @@ export default class Moviegrabber extends Plugin {
 		url.searchParams.append('apikey', this.settings.OMDb_API_Key);
 		url.searchParams.append('i', movie.imdbID);
 		url.searchParams.append('plot', this.settings.PlotLength);
+		url.searchParams.append('tomatoes', this.settings.RottenTomatoes.toString());
 
 		// fetch data
 		var response;

@@ -14,6 +14,7 @@ export interface MoviegrabberSettings {
 	SeriesTemplatePath: string;
 
 	PlotLength: string;
+	RottenTomatoes: boolean;
 	FilenameTemplateMovie: string;
 	FilenameTemplateSeries: string;
 
@@ -34,6 +35,7 @@ export const DEFAULT_SETTINGS: MoviegrabberSettings = {
 	FilenameTemplateSeries: '{{Title}}',
 	enablePosterImageSave: false,
 	posterImagePath: '',
+	RottenTomatoes: true
 }
 
 export const DEFAULT_TEMPLATE: string = "---\n" +
