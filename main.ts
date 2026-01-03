@@ -393,6 +393,7 @@ export default class Moviegrabber extends Plugin {
 			const suffix = split.length >= 3 ? split[2].replace(/\\\|/, '|') : '';
 			const transformation = split.length >= 4 ? split[3].replace(/\\\|/, '|') : '';
 			const stringFunction = split.length >= 5 ? split[4].replace(/\\\|/, '|') : '';
+			const separator = split.length >= 6 ? split[5].replace(/\\\|/g, '|').replace(/\\n/g, '\n') : ', ';
 
 			let result = '';
 			// handle the data being a list.
@@ -438,7 +439,7 @@ export default class Moviegrabber extends Plugin {
 				if (items[i] == '') {
 					continue;
 				}
-				result += result != '' ? ', ' : '';
+				result += result != '' ? separator : '';
 				result += prefix;
 				result += items[i]; // data
 				result += suffix;
